@@ -3,11 +3,12 @@
 using namespace std;
 
 int jannatuz_sprite, pruz_sprite, hypo_sprite, background_sprite, score_sprite, pipe_sprite;
+int x_hypo=0, y_hypo=150;
 
 typedef struct pipe pipe;
 struct pipe{ // Defines the platform (aka pipe) as a struct
 	int posX, posY;
-	
+
 	pipe(){ ; };
 
 	pipe(int x, int y){
@@ -16,19 +17,47 @@ struct pipe{ // Defines the platform (aka pipe) as a struct
 	};
 
 	void render(){
-		 iShowImage(posX, posY, 120, 33, pipe_sprite);
+		iShowImage(posX, posY, 120, 33, pipe_sprite);
 	}
 };
 
-int pipe_count = 2;
-pipe all_pipes[2]; // Array to maintain all the pipes
+int pipe_count = 25;
+pipe all_pipes[25]; // Array to maintain all the pipes
 
 void generateMap(){
 	// Vertical level 1
 	all_pipes[0] = pipe(0, 300);
 	all_pipes[1] = pipe(120, 300);
+	all_pipes[2] = pipe(240, 300);
+	all_pipes[3] = pipe(360, 300);
+	all_pipes[4] = pipe(680, 300);
+	all_pipes[5] = pipe(800, 300);
+	all_pipes[6] = pipe(920, 300);
+	all_pipes[7] = pipe(1040, 300);
+	all_pipes[8] = pipe(1160, 300);   // 0 to 8 index
+
+
 
 	// Vertical level 2
+	all_pipes[9] = pipe(240, 450);
+	all_pipes[10] = pipe(360, 450);
+	all_pipes[11] = pipe(480, 450);
+	all_pipes[12] = pipe(600, 450);
+	all_pipes[13] = pipe(720, 450);
+	all_pipes[14] = pipe(1040, 450);
+	all_pipes[15] = pipe(1160, 450);
+
+	//vertical level 3
+	all_pipes[16] = pipe(0, 600);
+	all_pipes[17] = pipe(120, 600);
+	all_pipes[18] = pipe(240, 600);
+	all_pipes[19] = pipe(360, 600);
+	all_pipes[20] = pipe(680, 600);
+	all_pipes[21] = pipe(800, 600);
+	all_pipes[22] = pipe(920, 600);
+	all_pipes[23] = pipe(1040, 600);
+	all_pipes[24] = pipe(1160, 600);
+
 }
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::Idraw Here::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::://
 
@@ -36,14 +65,22 @@ void generateMap(){
 void iDraw()
 {
 	iClear();
-	iShowImage(0, 150, 1280,650 , background_sprite);
-	iShowImage(0, 0, 1280, 150,score_sprite);
-	iShowImage(0, 150, 100, 100, hypo_sprite);
-	iShowImage(250, 650, 100, 50, pruz_sprite);
+	iShowImage(0, 150, 1280, 650, background_sprite);
+	iShowImage(0, 0, 1280, 150, score_sprite);
+	iShowImage(x_hypo, y_hypo, 100, 100, hypo_sprite);
+	//iShowImage(250, 650, 100, 50, pruz_sprite);
 
 	for (int i = 0; i < pipe_count; i++){
 		// iShowImage(all_pipes[i].posX, all_pipes[i].posY, 100, 50, pipe_sprite);
-		 all_pipes[i].render();
+		all_pipes[i].render();
+	}
+	if (x_hypo > 1280)
+	{
+		x_hypo = 0;
+	}
+	else if (x_hypo < 0)
+	{
+		x_hypo = 1280;
 	}
 }
 
@@ -55,27 +92,27 @@ void iDraw()
 
 void iMouseMove(int mx, int my)
 {
-	
+
 }
 //*******************************************************************ipassiveMouse***********************************************************************//
 void iPassiveMouseMove(int mx, int my)
 {
-	
+	cout << mx << " " << my << "\n";
 }
 
 void iMouse(int button, int state, int mx, int my)
 {
-	
+
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
 	{
 
-		
+
 	}
-	
-	
+
+
 	if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
 	{
-		
+
 	}
 }
 
@@ -87,11 +124,6 @@ key- holds the ASCII value of the key pressed.
 
 void iKeyboard(unsigned char key)
 {
-	if (key == 'm')
-	{	
-
-	}
-	
 	
 }
 
@@ -107,28 +139,36 @@ GLUT_KEY_PAGE DOWN, GLUT_KEY_HOME, GLUT_KEY_END, GLUT_KEY_INSERT
 void iSpecialKeyboard(unsigned char key)
 {
 
-	
+
 	if (key == GLUT_KEY_RIGHT)
 	{
-		
+		x_hypo += 5;
 	}
 	if (key == GLUT_KEY_LEFT)
 	{
-
+		x_hypo -= 10;   // 8 to 12 range is good
 	}
-	
+
 	if (key == GLUT_KEY_HOME)
 	{
-		
+
 	}
-	
+	if (key == GLUT_KEY_UP)
+	{
+		y_hypo += 10;
+	}
+	if (key == GLUT_KEY_DOWN)
+	{
+		y_hypo -= 5;
+	}
+
 }
 
 
 int main()
 {
 	///srand((unsigned)time(NULL));
-	iInitialize(1280, 720, "Basic Collision");
+	iInitialize(1280, 780, "Basic Collision");
 	///updated see the documentations
 	pruz_sprite = iLoadImage("./images/Pabak.png");
 	jannatuz_sprite = iLoadImage("./images/Nayem.png");
@@ -138,6 +178,7 @@ int main()
 	pipe_sprite = iLoadImage("./images/pipe.png");
 
 	generateMap();
+	// hello .cpp ashfaq ekta fokinni
 
 	iStart();
 	return 0;
