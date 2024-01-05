@@ -2,44 +2,50 @@
 #include<iostream>
 using namespace std;
 
+int jannatuz_sprite, pruz_sprite, hypo_sprite, background_sprite, score_sprite, pipe_sprite;
+
+typedef struct pipe pipe;
+struct pipe{ // Defines the platform (aka pipe) as a struct
+	int posX, posY;
+	
+	pipe(){ ; };
+
+	pipe(int x, int y){
+		posX = x;
+		posY = y;
+	};
+
+	void render(){
+		 iShowImage(posX, posY, 120, 33, pipe_sprite);
+	}
+};
+
+int pipe_count = 2;
+pipe all_pipes[2]; // Array to maintain all the pipes
+
+void generateMap(){
+	// Vertical level 1
+	all_pipes[0] = pipe(0, 300);
+	all_pipes[1] = pipe(120, 300);
+
+	// Vertical level 2
+}
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::Idraw Here::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::://
-double x = 0,y=150,r=50,b=500, inc1=0.5,inc2=0,c=40;
-double xx = 250,xy = 650,inc3=0;
-int flag = 0;
-int N, P,B,S,mv_left = 0, mv_right = 0;
-int left1 = 0;
+
 
 void iDraw()
 {
 	iClear();
-	iShowImage(0, 150, 1200,650 , B);
-	iShowImage(0, 0, 1200, 150,S);
-	iShowImage(x, y, 100, 50, N);
-	iShowImage(xx, xy, 100, 50, P);
-	iFilledRectangle(200, b, 100, 50);
-	//iFilledRectangle(200,c , 100, 50);
-	if(flag==1) // single jump 
-		y += inc1;
-	if (x+r >= 200 && x+r <= 200 + 100 && y+r>=b && y+r<= b+50)
-	{
-		inc1=-0.5;
-		inc2 = 0.5;
-	}
-	b += inc2;
-	if (xx + r >= 200 && xx + r <= 200 + 100 && xy - r >= b && xy - r <= b + 50)
-	{
-		inc3 = 10;
-		cout << "NANI" << "\n";
-	}
-	xy += inc3;
-	if (x + r >= 200 && x + r <= 200 + 100 && y - r >= c && y - r <= c + 50)
-	{
-		inc1 = 0;
+	iShowImage(0, 150, 1280,650 , background_sprite);
+	iShowImage(0, 0, 1280, 150,score_sprite);
+	iShowImage(0, 150, 100, 100, hypo_sprite);
+	iShowImage(250, 650, 100, 50, pruz_sprite);
+
+	for (int i = 0; i < pipe_count; i++){
+		// iShowImage(all_pipes[i].posX, all_pipes[i].posY, 100, 50, pipe_sprite);
+		 all_pipes[i].render();
 	}
 }
-
-
-
 
 
 /*function iMouseMove() is called when the user presses and drags the mouse.
@@ -83,7 +89,7 @@ void iKeyboard(unsigned char key)
 {
 	if (key == 'm')
 	{	
-		flag = 1;
+
 	}
 	
 	
@@ -104,12 +110,11 @@ void iSpecialKeyboard(unsigned char key)
 	
 	if (key == GLUT_KEY_RIGHT)
 	{
-		x += 2;
 		
 	}
 	if (key == GLUT_KEY_LEFT)
 	{
-		x -= 2;
+
 	}
 	
 	if (key == GLUT_KEY_HOME)
@@ -123,12 +128,16 @@ void iSpecialKeyboard(unsigned char key)
 int main()
 {
 	///srand((unsigned)time(NULL));
-	iInitialize(1200, 800, "Basic Collision");
+	iInitialize(1280, 720, "Basic Collision");
 	///updated see the documentations
-	P = iLoadImage("./images/Pabak.png");
-	N = iLoadImage("./images/Nayem.png");
-	B = iLoadImage("./images/bg.png");
-	S = iLoadImage("./images/Score.png");
+	pruz_sprite = iLoadImage("./images/Pabak.png");
+	jannatuz_sprite = iLoadImage("./images/Nayem.png");
+	background_sprite = iLoadImage("./images/bg.png");
+	score_sprite = iLoadImage("./images/Score.png");
+	hypo_sprite = iLoadImage("./images/ashfaq.png");
+	pipe_sprite = iLoadImage("./images/pipe.png");
+
+	generateMap();
 
 	iStart();
 	return 0;
