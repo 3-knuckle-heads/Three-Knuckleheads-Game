@@ -3,7 +3,7 @@
 using namespace std;
 
 int jannatuz_sprite, pruz_sprite, hypo_sprite, background_sprite, score_sprite, pipe_sprite;
-int x_hypo=80, y_hypo=370;
+int x_hypo=140, y_hypo=720;
 
 typedef struct pipe pipe;
 struct pipe{ // Defines the platform (aka pipe) as a struct
@@ -21,7 +21,7 @@ struct pipe{ // Defines the platform (aka pipe) as a struct
 		iShowImage(posX, posY, sizeX, sizeY, pipe_sprite);
 	}
 
-	int isColliding(int playerX, int playerY){
+	int isColliding(int playerX, int playerY){ // checks if player is colliding with a particular pipe or not
 		if ((playerX >= posX && playerX <= posX + sizeX) && (playerY >= posY && playerY <= posY + sizeY)){
 			return 1;
 		}
@@ -90,18 +90,18 @@ void iDraw()
 	iShowImage(x_hypo, y_hypo, 100, 100, hypo_sprite);
 	//iShowImage(250, 650, 100, 50, pruz_sprite);
 
-	int flag = 0;
+	int flag = 0; // flag for colliding
 	for (int i = 0; i < pipe_count; i++){
 		all_pipes[i].render();
 
 		if (all_pipes[i].isColliding(x_hypo, y_hypo)) // either 0 or 1 is returned
 		{
-			flag = 1;
+			flag = 1; // colliding with any one pipe
 		}
 	}
 
-	if (flag == 0){
-		y_hypo -= 0.08;
+	if (flag == 0){ // colliding with no pipes at all
+		y_hypo -= 4.5;
 	}
 
 	// Screen looping logic 
