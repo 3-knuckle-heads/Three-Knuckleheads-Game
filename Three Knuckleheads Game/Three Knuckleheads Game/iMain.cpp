@@ -3,7 +3,7 @@
 using namespace std;
 
 int jannatuz_sprite, pruz_sprite, hypo_sprite, background_sprite, score_sprite, pipe_sprite;
-int x_hypo=0, y_hypo=150;
+int x_hypo=0, y_hypo=170;
 
 typedef struct pipe pipe;
 struct pipe{ // Defines the platform (aka pipe) as a struct
@@ -59,6 +59,17 @@ void generateMap(){
 	all_pipes[24] = pipe(1160, 600);
 
 }
+
+void images()
+{
+	///updated see the documentations
+	pruz_sprite = iLoadImage("./images/Pabak.png");
+	jannatuz_sprite = iLoadImage("./images/Nayem.png");
+	background_sprite = iLoadImage("./images/bg.png");
+	score_sprite = iLoadImage("./images/Score.png");
+	hypo_sprite = iLoadImage("./images/ashfaq.png");
+	pipe_sprite = iLoadImage("./images/pipe.png");
+}
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::Idraw Here::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::://
 
 
@@ -66,7 +77,7 @@ void iDraw()
 {
 	iClear();
 	iShowImage(0, 150, 1280, 650, background_sprite);
-	iShowImage(0, 0, 1280, 150, score_sprite);
+	iShowImage(0, 0, 1280, 170, score_sprite);
 	iShowImage(x_hypo, y_hypo, 100, 100, hypo_sprite);
 	//iShowImage(250, 650, 100, 50, pruz_sprite);
 
@@ -168,17 +179,10 @@ void iSpecialKeyboard(unsigned char key)
 int main()
 {
 	///srand((unsigned)time(NULL));
-	iInitialize(1280, 780, "Basic Collision");
-	///updated see the documentations
-	pruz_sprite = iLoadImage("./images/Pabak.png");
-	jannatuz_sprite = iLoadImage("./images/Nayem.png");
-	background_sprite = iLoadImage("./images/bg.png");
-	score_sprite = iLoadImage("./images/Score.png");
-	hypo_sprite = iLoadImage("./images/ashfaq.png");
-	pipe_sprite = iLoadImage("./images/pipe.png");
-
-	generateMap();
-	// hello .cpp ashfaq ekta fokinni
+	iInitialize(1280, 780, "Three Knuckleheads");
+	
+	images(); // used an image function to declare the images
+	generateMap(); // used a generateMap function to generate the pipes on the foreground
 
 	iStart();
 	return 0;
