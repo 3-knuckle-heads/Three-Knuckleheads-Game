@@ -167,7 +167,8 @@ key- holds the ASCII value of the key pressed.
 
 void iKeyboard(unsigned char key)
 {
-	if (key == 'j'){
+	if (key == 'j') // using j to jump 
+	{
 		hasJumped = true;
 	}
 }
