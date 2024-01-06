@@ -3,11 +3,12 @@
 using namespace std;
 
 int jannatuz_sprite, pruz_sprite, hypo_sprite, background_sprite, score_sprite, pipe_sprite;
-int x_hypo=0, y_hypo=170;
+int x_hypo=80, y_hypo=370;
 
 typedef struct pipe pipe;
 struct pipe{ // Defines the platform (aka pipe) as a struct
 	int posX, posY;
+	int sizeX = 120, sizeY = 33;
 
 	pipe(){ ; };
 
@@ -17,7 +18,15 @@ struct pipe{ // Defines the platform (aka pipe) as a struct
 	};
 
 	void render(){
-		iShowImage(posX, posY, 120, 33, pipe_sprite);
+		iShowImage(posX, posY, sizeX, sizeY, pipe_sprite);
+	}
+
+	int isColliding(int playerX, int playerY){
+		if ((playerX >= posX && playerX <= posX + sizeX) && (playerY >= posY && playerY <= posY + sizeY)){
+			return 1;
+		}
+
+		return 0;
 	}
 };
 
@@ -81,10 +90,21 @@ void iDraw()
 	iShowImage(x_hypo, y_hypo, 100, 100, hypo_sprite);
 	//iShowImage(250, 650, 100, 50, pruz_sprite);
 
+	int flag = 0;
 	for (int i = 0; i < pipe_count; i++){
-		// iShowImage(all_pipes[i].posX, all_pipes[i].posY, 100, 50, pipe_sprite);
 		all_pipes[i].render();
+
+		if (all_pipes[i].isColliding(x_hypo, y_hypo)) // either 0 or 1 is returned
+		{
+			flag = 1;
+		}
 	}
+
+	if (flag == 0){
+		y_hypo -= 0.08;
+	}
+
+	// Screen looping logic 
 	if (x_hypo > 1280)
 	{
 		x_hypo = 0;
