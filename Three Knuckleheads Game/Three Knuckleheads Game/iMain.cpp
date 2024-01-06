@@ -3,7 +3,8 @@
 using namespace std;
 
 int jannatuz_sprite, pruz_sprite, hypo_sprite, background_sprite, score_sprite, pipe_sprite;
-int x_hypo=140, y_hypo=720;
+int x_hypo=140, y_hypo=720, jump_count = 0;
+bool hasJumped = false;
 
 typedef struct pipe pipe;
 struct pipe{ // Defines the platform (aka pipe) as a struct
@@ -94,14 +95,25 @@ void iDraw()
 	for (int i = 0; i < pipe_count; i++){
 		all_pipes[i].render();
 
-		if (all_pipes[i].isColliding(x_hypo, y_hypo)) // either 0 or 1 is returned
+		if (all_pipes[i].isColliding(x_hypo + 100 / 2, y_hypo)) // either 0 or 1 is returned
 		{
 			flag = 1; // colliding with any one pipe
 		}
 	}
 
 	if (flag == 0){ // colliding with no pipes at all
-		y_hypo -= 4.5;
+		y_hypo -= 4;
+	}
+
+	if (hasJumped){
+		if (jump_count < 20){
+			y_hypo += 15;
+			jump_count++;
+		}
+		else{
+			hasJumped = false;
+			jump_count = 0;
+		}
 	}
 
 	// Screen looping logic 
@@ -155,7 +167,9 @@ key- holds the ASCII value of the key pressed.
 
 void iKeyboard(unsigned char key)
 {
-	
+	if (key == 'j'){
+		hasJumped = true;
+	}
 }
 
 /*
@@ -173,24 +187,16 @@ void iSpecialKeyboard(unsigned char key)
 
 	if (key == GLUT_KEY_RIGHT)
 	{
-		x_hypo += 5;
+		x_hypo += 12;
 	}
 	if (key == GLUT_KEY_LEFT)
 	{
-		x_hypo -= 10;   // 8 to 12 range is good
+		x_hypo -= 12;   // 8 to 12 range is good
 	}
 
 	if (key == GLUT_KEY_HOME)
 	{
 
-	}
-	if (key == GLUT_KEY_UP)
-	{
-		y_hypo += 10;
-	}
-	if (key == GLUT_KEY_DOWN)
-	{
-		y_hypo -= 5;
 	}
 
 }
