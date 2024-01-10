@@ -6,13 +6,26 @@ int jannatuz_sprite, pruz_sprite, hypo_sprite, background_sprite, score_sprite, 
 
 typedef struct player player;
 struct player{ // Defines the player character for the game
-	int posX = 140, posY = 720, jump_count = 0;
-	bool hasJumped = false;
+	int posX = 50, posY = 190;
+	int jump_count = 0;
+	bool hasJumped = false, hasLanded = true;
+
+	int bottomX, bottomY;
+	int topX, topY;
+	int rightX, rightY;
+	int leftX, leftY;
 
 	player(){ ; };
 	
 	void render(){
 		iShowImage(posX - 100/2, posY, 100, 100, hypo_sprite);
+	}
+
+	void updateBounds(){
+		bottomX = posX, bottomY = posY;
+		topX = posX, topY = posY + 100;
+		rightX = posX + 100 / 2, rightY = posY + 100 / 2;
+		leftX = posX - 100 / 2, leftY = posY + 100 / 2;
 	}
 };
 
@@ -38,6 +51,10 @@ struct pipe{ // Defines the platform (aka pipe) as a struct
 		}
 
 		return 0;
+	}
+
+	void bump(){
+		posY += 50;
 	}
 };
 
@@ -109,6 +126,7 @@ void images()
 void iDraw()
 {
 	iClear();
+	current_player.updateBounds();
 	iShowImage(0, 150, 1280, 650, background_sprite);
 	
 	// render the player
@@ -120,19 +138,38 @@ void iDraw()
 	for (int i = 0; i < pipe_count; i++){
 		all_pipes[i].render();
 
-		if (all_pipes[i].isColliding(current_player.posX + 100 / 2, current_player.posY)) // either 0 or 1 is returned
+		// bottom collision check
+		if (all_pipes[i].isColliding(current_player.bottomX, current_player.bottomY)) // either 0 or 1 is returned
 		{
 			flag = 1; // colliding with any one pipe
+		}
+
+		// top collision check
+		if (all_pipes[i].isColliding(current_player.topX, current_player.topY)) // either 0 or 1 is returned
+		{
+			if (current_player.hasJumped){
+				cout << "A pipe was bumped: " << i << endl;
+				all_pipes[i].bump();
+				current_player.jump_count = 17;
+			}
+			else{
+
+			}
 		}
 	}
 
 	if (flag == 0){ // colliding with no pipes at all
-		current_player.posY -= 4;
+		current_player.posY -= 2;
+
+		current_player.hasLanded = false;
+	}
+	else{
+		current_player.hasLanded = true;
 	}
 
 	if (current_player.hasJumped){
-		if (current_player.jump_count < 20){
-			current_player.posY += 15;
+		if (current_player.jump_count < 17){
+			current_player.posY += 12;
 			current_player.jump_count++;
 		}
 		else{
@@ -196,7 +233,19 @@ void iKeyboard(unsigned char key)
 {
 	if (key == 'j') // using j to jump 
 	{
-		current_player.hasJumped = true;
+		if (current_player.hasLanded){
+			current_player.hasJumped = true;
+		}
+	}
+
+	if (key == 'd')
+	{
+		current_player.posX += 25;
+		cout << "Moving right    ";
+	}
+	if (key == 'a')
+	{
+		current_player.posX -= 25;   // 8 to 12 range is good
 	}
 }
 
@@ -215,11 +264,12 @@ void iSpecialKeyboard(unsigned char key)
 
 	if (key == GLUT_KEY_RIGHT)
 	{
-		current_player.posX += 12;
+		current_player.posX += 25;
+		cout << "Moving right    ";
 	}
 	if (key == GLUT_KEY_LEFT)
 	{
-		current_player.posX -= 12;   // 8 to 12 range is good
+		current_player.posX -= 25;   // 8 to 12 range is good
 	}
 
 	if (key == GLUT_KEY_HOME)
