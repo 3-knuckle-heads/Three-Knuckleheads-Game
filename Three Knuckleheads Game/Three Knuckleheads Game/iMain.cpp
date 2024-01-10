@@ -31,8 +31,8 @@ struct pipe{ // Defines the platform (aka pipe) as a struct
 	}
 };
 
-int pipe_count = 25;
-pipe all_pipes[25]; // Array to maintain all the pipes
+int pipe_count = 31;
+pipe all_pipes[31]; // Array to maintain all the pipes
 
 void generateMap(){
 	// Vertical level 1
@@ -57,7 +57,7 @@ void generateMap(){
 	all_pipes[14] = pipe(1040, 450);
 	all_pipes[15] = pipe(1160, 450);
 
-	//vertical level 3
+	// Vertical level 3
 	all_pipes[16] = pipe(0, 600);
 	all_pipes[17] = pipe(120, 600);
 	all_pipes[18] = pipe(240, 600);
@@ -68,6 +68,17 @@ void generateMap(){
 	all_pipes[23] = pipe(1040, 600);
 	all_pipes[24] = pipe(1160, 600);
 
+	// Bottom (under score image) pipe, so that player does not fall through bottom
+	all_pipes[25] = pipe(0, 0);
+	all_pipes[25].sizeX = 1400;
+	all_pipes[25].sizeY = 170;
+
+	// Side (out of screen) pipes, so that player does not fall when looping the screen
+	all_pipes[26] = pipe(-120, 300);
+	all_pipes[27] = pipe(1280, 300);
+	all_pipes[28] = pipe(1280, 450);
+	all_pipes[29] = pipe(-120, 600);
+	all_pipes[30] = pipe(1280, 600);
 }
 
 void images()
@@ -87,7 +98,7 @@ void iDraw()
 {
 	iClear();
 	iShowImage(0, 150, 1280, 650, background_sprite);
-	iShowImage(0, 0, 1280, 170, score_sprite);
+	
 	iShowImage(x_hypo, y_hypo, 100, 100, hypo_sprite);
 	//iShowImage(250, 650, 100, 50, pruz_sprite);
 
@@ -125,6 +136,8 @@ void iDraw()
 	{
 		x_hypo = 1280;
 	}
+
+	iShowImage(0, 0, 1280, 170, score_sprite);
 }
 
 
