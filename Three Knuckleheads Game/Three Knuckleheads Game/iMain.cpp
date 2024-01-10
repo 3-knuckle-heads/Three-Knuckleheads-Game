@@ -3,8 +3,18 @@
 using namespace std;
 
 int jannatuz_sprite, pruz_sprite, hypo_sprite, background_sprite, score_sprite, pipe_sprite;
-int x_hypo=140, y_hypo=720, jump_count = 0;
-bool hasJumped = false;
+
+typedef struct player player;
+struct player{ // Defines the player character for the game
+	int posX = 140, posY = 720, jump_count = 0;
+	bool hasJumped = false;
+
+	player(){ ; };
+	
+	void render(){
+		iShowImage(posX - 100/2, posY, 100, 100, hypo_sprite);
+	}
+};
 
 typedef struct pipe pipe;
 struct pipe{ // Defines the platform (aka pipe) as a struct
@@ -33,6 +43,8 @@ struct pipe{ // Defines the platform (aka pipe) as a struct
 
 int pipe_count = 31;
 pipe all_pipes[31]; // Array to maintain all the pipes
+
+player current_player;
 
 void generateMap(){
 	// Vertical level 1
@@ -99,42 +111,44 @@ void iDraw()
 	iClear();
 	iShowImage(0, 150, 1280, 650, background_sprite);
 	
-	iShowImage(x_hypo, y_hypo, 100, 100, hypo_sprite);
+	// render the player
+	current_player.render();
+
 	//iShowImage(250, 650, 100, 50, pruz_sprite);
 
 	int flag = 0; // flag for colliding
 	for (int i = 0; i < pipe_count; i++){
 		all_pipes[i].render();
 
-		if (all_pipes[i].isColliding(x_hypo + 100 / 2, y_hypo)) // either 0 or 1 is returned
+		if (all_pipes[i].isColliding(current_player.posX + 100 / 2, current_player.posY)) // either 0 or 1 is returned
 		{
 			flag = 1; // colliding with any one pipe
 		}
 	}
 
 	if (flag == 0){ // colliding with no pipes at all
-		y_hypo -= 4;
+		current_player.posY -= 4;
 	}
 
-	if (hasJumped){
-		if (jump_count < 20){
-			y_hypo += 15;
-			jump_count++;
+	if (current_player.hasJumped){
+		if (current_player.jump_count < 20){
+			current_player.posY += 15;
+			current_player.jump_count++;
 		}
 		else{
-			hasJumped = false;
-			jump_count = 0;
+			current_player.hasJumped = false;
+			current_player.jump_count = 0;
 		}
 	}
 
 	// Screen looping logic 
-	if (x_hypo > 1280)
+	if (current_player.posX > 1280)
 	{
-		x_hypo = 0;
+		current_player.posX = 0;
 	}
-	else if (x_hypo < 0)
+	else if (current_player.posX < 0)
 	{
-		x_hypo = 1280;
+		current_player.posX = 1280;
 	}
 
 	iShowImage(0, 0, 1280, 170, score_sprite);
@@ -182,7 +196,7 @@ void iKeyboard(unsigned char key)
 {
 	if (key == 'j') // using j to jump 
 	{
-		hasJumped = true;
+		current_player.hasJumped = true;
 	}
 }
 
@@ -201,11 +215,11 @@ void iSpecialKeyboard(unsigned char key)
 
 	if (key == GLUT_KEY_RIGHT)
 	{
-		x_hypo += 12;
+		current_player.posX += 12;
 	}
 	if (key == GLUT_KEY_LEFT)
 	{
-		x_hypo -= 12;   // 8 to 12 range is good
+		current_player.posX -= 12;   // 8 to 12 range is good
 	}
 
 	if (key == GLUT_KEY_HOME)
