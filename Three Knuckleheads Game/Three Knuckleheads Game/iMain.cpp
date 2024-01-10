@@ -3,6 +3,7 @@
 using namespace std;
 
 int jannatuz_sprite, pruz_sprite, hypo_sprite, background_sprite, score_sprite, pipe_sprite;
+int cat_sprites[11];
 
 typedef struct player player;
 struct player{ // Defines the player character for the game
@@ -29,9 +30,56 @@ struct player{ // Defines the player character for the game
 	}
 };
 
+typedef struct cat cat;
+struct cat{
+	int posX = 50, posY = 640;
+
+	int bottomX, bottomY;
+	int topX, topY;
+	int rightX, rightY;
+	int leftX, leftY;
+
+	int animIndex = 0, animTimer = 0;
+
+	bool isStunned = false;
+
+	cat(){ ; };
+
+	void render(){
+		if (!isStunned){
+			iShowImage(posX - 100 / 2, posY, 100, 100, cat_sprites[animIndex]);
+			animTimer++;
+
+			if (animTimer >= 5){
+				animTimer = 0;
+				animIndex++;
+
+				if (animIndex > 9){
+					animIndex = 0;
+				}
+			}
+		}
+		else{
+			iShowImage(posX - 100 / 2, posY, 100, 100, cat_sprites[10]);
+		}
+	}
+
+	void updateBounds(){
+		bottomX = posX, bottomY = posY;
+		topX = posX, topY = posY + 100;
+		rightX = posX + 100 / 2, rightY = posY + 100 / 2;
+		leftX = posX - 100 / 2, leftY = posY + 100 / 2;
+	}
+};
+
+player current_player;
+cat enemy;
+
 typedef struct pipe pipe;
 struct pipe{ // Defines the platform (aka pipe) as a struct
 	int posX, posY;
+	int bump_count = 0;
+	bool isBumped = false;
 	int sizeX = 120, sizeY = 33;
 
 	pipe(){ ; };
@@ -54,14 +102,55 @@ struct pipe{ // Defines the platform (aka pipe) as a struct
 	}
 
 	void bump(){
-		posY += 50;
+		isBumped = true;
+
+		if (isColliding(enemy.bottomX, enemy.bottomY)){
+			enemy.isStunned = true;
+		}
+	}
+
+	void updateBumpStatus(){
+		if (bump_count < 7){
+			posY += 8;
+		}
+		else if (bump_count < 14){
+			posY -= 8;
+		}
+
+		bump_count++;
+
+		if (bump_count >= 14){
+			bump_count = 0;
+			isBumped = false;
+		}
 	}
 };
 
+void images()
+{
+	///updated see the documentations
+	pruz_sprite = iLoadImage("./images/Pabak.png");
+	jannatuz_sprite = iLoadImage("./images/Nayem.png");
+	background_sprite = iLoadImage("./images/bg.png");
+	score_sprite = iLoadImage("./images/Score.png");
+	hypo_sprite = iLoadImage("./images/ashfaq.png");
+	pipe_sprite = iLoadImage("./images/pipe.png");
+
+	cat_sprites[0] = iLoadImage("./images/cat/Walk (1).png");
+	cat_sprites[1] = iLoadImage("./images/cat/Walk (2).png");
+	cat_sprites[2] = iLoadImage("./images/cat/Walk (3).png");
+	cat_sprites[3] = iLoadImage("./images/cat/Walk (4).png");
+	cat_sprites[4] = iLoadImage("./images/cat/Walk (5).png");
+	cat_sprites[5] = iLoadImage("./images/cat/Walk (6).png");
+	cat_sprites[6] = iLoadImage("./images/cat/Walk (7).png");
+	cat_sprites[7] = iLoadImage("./images/cat/Walk (8).png");
+	cat_sprites[8] = iLoadImage("./images/cat/Walk (9).png");
+	cat_sprites[9] = iLoadImage("./images/cat/Walk (10).png");
+	cat_sprites[10] = iLoadImage("./images/cat/Dead (10).png");
+}
+
 int pipe_count = 31;
 pipe all_pipes[31]; // Array to maintain all the pipes
-
-player current_player;
 
 void generateMap(){
 	// Vertical level 1
@@ -109,17 +198,6 @@ void generateMap(){
 	all_pipes[29] = pipe(-120, 600);
 	all_pipes[30] = pipe(1280, 600);
 }
-
-void images()
-{
-	///updated see the documentations
-	pruz_sprite = iLoadImage("./images/Pabak.png");
-	jannatuz_sprite = iLoadImage("./images/Nayem.png");
-	background_sprite = iLoadImage("./images/bg.png");
-	score_sprite = iLoadImage("./images/Score.png");
-	hypo_sprite = iLoadImage("./images/ashfaq.png");
-	pipe_sprite = iLoadImage("./images/pipe.png");
-}
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::Idraw Here::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::://
 
 
@@ -127,39 +205,57 @@ void iDraw()
 {
 	iClear();
 	current_player.updateBounds();
+	enemy.updateBounds();
 	iShowImage(0, 150, 1280, 650, background_sprite);
 	
 	// render the player
 	current_player.render();
+	enemy.render();
 
 	//iShowImage(250, 650, 100, 50, pruz_sprite);
 
-	int flag = 0; // flag for colliding
+	int playerCollisionFlag = 0; // flag for colliding
+	int catCollisionFlag = 0;
 	for (int i = 0; i < pipe_count; i++){
 		all_pipes[i].render();
+
+		if (all_pipes[i].isBumped){
+			all_pipes[i].updateBumpStatus();
+		}
 
 		// bottom collision check
 		if (all_pipes[i].isColliding(current_player.bottomX, current_player.bottomY)) // either 0 or 1 is returned
 		{
-			flag = 1; // colliding with any one pipe
+			playerCollisionFlag = 1; // colliding with any one pipe
 		}
 
 		// top collision check
 		if (all_pipes[i].isColliding(current_player.topX, current_player.topY)) // either 0 or 1 is returned
 		{
 			if (current_player.hasJumped){
-				cout << "A pipe was bumped: " << i << endl;
-				all_pipes[i].bump();
-				current_player.jump_count = 17;
+				if (!all_pipes[i].isBumped){
+					cout << "A pipe was bumped: " << i << endl;
+					all_pipes[i].bump();
+				}
+
+				current_player.jump_count = 16;
 			}
 			else{
-
+				//current_player.posY = all_pipes[i].posY + 40;
 			}
+		}
+
+		// bottom collision check for cat
+		if (all_pipes[i].isColliding(enemy.bottomX, enemy.bottomY)) // either 0 or 1 is returned
+		{
+			catCollisionFlag = 1; // colliding with any one pipe
 		}
 	}
 
-	if (flag == 0){ // colliding with no pipes at all
-		current_player.posY -= 2;
+	if (playerCollisionFlag == 0){ // colliding with no pipes at all
+		if (!current_player.hasJumped){
+			current_player.posY -= 3;
+		}
 
 		current_player.hasLanded = false;
 	}
@@ -167,9 +263,17 @@ void iDraw()
 		current_player.hasLanded = true;
 	}
 
+	if (catCollisionFlag == 0){
+		enemy.posY -= 3;
+	}
+
+	if (!enemy.isStunned){
+		enemy.posX += 2;
+	}
+
 	if (current_player.hasJumped){
-		if (current_player.jump_count < 17){
-			current_player.posY += 12;
+		if (current_player.jump_count < 16){
+			current_player.posY += 10;
 			current_player.jump_count++;
 		}
 		else{
@@ -186,6 +290,15 @@ void iDraw()
 	else if (current_player.posX < 0)
 	{
 		current_player.posX = 1280;
+	}
+
+	if (enemy.posX > 1280)
+	{
+		enemy.posX = 0;
+	}
+	else if (enemy.posX < 0)
+	{
+		enemy.posX = 1280;
 	}
 
 	iShowImage(0, 0, 1280, 170, score_sprite);
@@ -231,21 +344,9 @@ key- holds the ASCII value of the key pressed.
 
 void iKeyboard(unsigned char key)
 {
-	if (key == 'j') // using j to jump 
+	if (key == 'j')
 	{
-		if (current_player.hasLanded){
-			current_player.hasJumped = true;
-		}
-	}
 
-	if (key == 'd')
-	{
-		current_player.posX += 25;
-		cout << "Moving right    ";
-	}
-	if (key == 'a')
-	{
-		current_player.posX -= 25;   // 8 to 12 range is good
 	}
 }
 
@@ -264,17 +365,18 @@ void iSpecialKeyboard(unsigned char key)
 
 	if (key == GLUT_KEY_RIGHT)
 	{
-		current_player.posX += 25;
-		cout << "Moving right    ";
+		current_player.posX += 40;
 	}
 	if (key == GLUT_KEY_LEFT)
 	{
-		current_player.posX -= 25;   // 8 to 12 range is good
+		current_player.posX -= 40;   // 8 to 12 range is good
 	}
 
-	if (key == GLUT_KEY_HOME)
+	if (key == GLUT_KEY_UP)
 	{
-
+		if (current_player.hasLanded){
+			current_player.hasJumped = true;
+		}
 	}
 
 }
