@@ -19,7 +19,7 @@ struct player{ // Defines the player character for the game
 	player(){ ; };
 	
 	void render(){
-		iShowImage(posX - 100/2, posY, 100, 100, hypo_sprite);
+		iShowImage(posX - 100/2, posY, 100, 100, jannatuz_sprite);
 	}
 
 	void updateBounds(){
