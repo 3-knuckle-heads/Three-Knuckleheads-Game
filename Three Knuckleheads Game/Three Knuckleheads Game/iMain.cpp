@@ -1,5 +1,6 @@
 #include "iGraphics.h"
 #include<iostream>
+#include<vector>
 using namespace std;
 
 int jannatuz_sprite, pruz_sprite, hypo_sprite, background_sprite, score_sprite, pipe_sprite;
@@ -40,6 +41,7 @@ struct cat{
 	int leftX, leftY;
 
 	int animIndex = 0, animTimer = 0;
+	int catCollisionFlag;
 
 	bool isStunned = false;
 
@@ -50,7 +52,7 @@ struct cat{
 			iShowImage(posX - 100 / 2, posY, 100, 100, cat_sprites[animIndex]);
 			animTimer++;
 
-			if (animTimer >= 5){
+			if (animTimer >= 50){
 				animTimer = 0;
 				animIndex++;
 
@@ -73,7 +75,9 @@ struct cat{
 };
 
 player current_player;
-cat enemy;
+
+int enemy_count_max = 12;
+vector<cat> enemies;
 
 typedef struct pipe pipe;
 struct pipe{ // Defines the platform (aka pipe) as a struct
@@ -104,22 +108,24 @@ struct pipe{ // Defines the platform (aka pipe) as a struct
 	void bump(){
 		isBumped = true;
 
-		if (isColliding(enemy.bottomX, enemy.bottomY)){
-			enemy.isStunned = true;
+		for (int i = 0; i < enemies.size(); i++){
+			if (isColliding(enemies[i].bottomX, enemies[i].bottomY)){
+				enemies[i].isStunned = true;
+			}
 		}
 	}
 
 	void updateBumpStatus(){
-		if (bump_count < 7){
-			posY += 8;
+		if (bump_count < 70){
+			posY += 1;
 		}
-		else if (bump_count < 14){
-			posY -= 8;
+		else if (bump_count < 140){
+			posY -= 1;
 		}
 
 		bump_count++;
 
-		if (bump_count >= 14){
+		if (bump_count >= 140){
 			bump_count = 0;
 			isBumped = false;
 		}
@@ -151,6 +157,8 @@ void images()
 
 int pipe_count = 31;
 pipe all_pipes[31]; // Array to maintain all the pipes
+
+int playerCollisionFlag;
 
 void generateMap(){
 	// Vertical level 1
@@ -205,17 +213,23 @@ void iDraw()
 {
 	iClear();
 	current_player.updateBounds();
-	enemy.updateBounds();
+
+	for (int i = 0; i < enemies.size(); i++)
+		enemies[i].updateBounds();
+
 	iShowImage(0, 150, 1280, 650, background_sprite);
 	
 	// render the player
 	current_player.render();
-	enemy.render();
+	for (int i = 0; i < enemies.size(); i++){
+		enemies[i].render();
+		enemies[i].catCollisionFlag = 0;
+	}
 
 	//iShowImage(250, 650, 100, 50, pruz_sprite);
 
-	int playerCollisionFlag = 0; // flag for colliding
-	int catCollisionFlag = 0;
+	playerCollisionFlag = 0; // flag for colliding
+	
 	for (int i = 0; i < pipe_count; i++){
 		all_pipes[i].render();
 
@@ -244,14 +258,23 @@ void iDraw()
 				//current_player.posY = all_pipes[i].posY + 40;
 			}
 		}
+		for (int j = 0; j < enemies.size(); j++){
+			// bottom collision check for cat
+			if (all_pipes[i].isColliding(enemies[j].bottomX, enemies[j].bottomY)) // either 0 or 1 is returned
+			{
+				enemies[j].catCollisionFlag = 1; // colliding with any one pipe
 
-		// bottom collision check for cat
-		if (all_pipes[i].isColliding(enemy.bottomX, enemy.bottomY)) // either 0 or 1 is returned
-		{
-			catCollisionFlag = 1; // colliding with any one pipe
+			}
 		}
 	}
 
+	
+
+	iShowImage(0, 0, 1280, 170, score_sprite);
+}
+
+void updateLoop(){
+	cout << "u" << endl;
 	if (playerCollisionFlag == 0){ // colliding with no pipes at all
 		if (!current_player.hasJumped){
 			current_player.posY -= 3;
@@ -262,13 +285,15 @@ void iDraw()
 	else{
 		current_player.hasLanded = true;
 	}
+	for (int i = 0; i < enemies.size(); i++){
 
-	if (catCollisionFlag == 0){
-		enemy.posY -= 3;
-	}
+		if (enemies[i].catCollisionFlag == 0){
+			enemies[i].posY -= 6;
+		}
 
-	if (!enemy.isStunned){
-		enemy.posX += 2;
+		if (!enemies[i].isStunned){
+			enemies[i].posX += 2;
+		}
 	}
 
 	if (current_player.hasJumped){
@@ -291,19 +316,23 @@ void iDraw()
 	{
 		current_player.posX = 1280;
 	}
+	for (int i = 0; i < enemies.size(); i++){
 
-	if (enemy.posX > 1280)
-	{
-		enemy.posX = 0;
+		if (enemies[i].posX > 1280)
+		{
+			enemies[i].posX = 0;
+		}
+		else if (enemies[i].posX < 0)
+		{
+			enemies[i].posX = 1280;
+		}
 	}
-	else if (enemy.posX < 0)
-	{
-		enemy.posX = 1280;
-	}
-
-	iShowImage(0, 0, 1280, 170, score_sprite);
 }
 
+void spawnEnemy(){
+	if (enemies.size() < enemy_count_max)
+		enemies.push_back(cat());
+}
 
 /*function iMouseMove() is called when the user presses and drags the mouse.
 (mx, my) is the position where the mouse pointer is.
@@ -389,6 +418,9 @@ int main()
 	
 	images(); // used an image function to declare the images
 	generateMap(); // used a generateMap function to generate the pipes on the foreground
+
+	iSetTimer(25, updateLoop);
+	iSetTimer(2000, spawnEnemy);
 
 	iStart();
 	return 0;
