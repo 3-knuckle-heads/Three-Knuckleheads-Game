@@ -6,6 +6,8 @@ using namespace std;
 int jannatuz_sprite, pruz_sprite, hypo_sprite, background_sprite, score_sprite, pipe_sprite;
 int cat_sprites[11];
 
+int points = 0;
+
 typedef struct player player;
 struct player{ // Defines the player character for the game
 	int posX = 50, posY = 190;
@@ -109,8 +111,9 @@ struct pipe{ // Defines the platform (aka pipe) as a struct
 		isBumped = true;
 
 		for (int i = 0; i < enemies.size(); i++){
-			if (isColliding(enemies[i].bottomX, enemies[i].bottomY)){
+			if (isColliding(enemies[i].bottomX, enemies[i].bottomY) && !enemies[i].isStunned){
 				enemies[i].isStunned = true;
+				points++;
 			}
 		}
 	}
@@ -268,7 +271,10 @@ void iDraw()
 		}
 	}
 
-	
+	cout << points;
+	char pointsS[50];
+	sprintf_s(pointsS, "%d", points);
+	iText(500, 500, pointsS);
 
 	iShowImage(0, 0, 1280, 170, score_sprite);
 }
