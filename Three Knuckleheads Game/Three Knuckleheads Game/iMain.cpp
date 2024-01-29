@@ -107,22 +107,6 @@ struct pipe{ // Defines the platform (aka pipe) as a struct
 			}
 		}
 	}
-
-	void updateBumpStatus(){
-		if (bump_count < 70){
-			posY += 1;
-		}
-		else if (bump_count < 140){
-			posY -= 1;
-		}
-
-		bump_count++;
-
-		if (bump_count >= 140){
-			bump_count = 0;
-			isBumped = false;
-		}
-	}
 };
 
 void images()
@@ -226,10 +210,6 @@ void iDraw()
 	for (int i = 0; i < pipe_count; i++){
 		all_pipes[i].render();
 
-		if (all_pipes[i].isBumped){
-			all_pipes[i].updateBumpStatus();
-		}
-
 		// bottom collision check
 		if (all_pipes[i].isColliding(current_player.bottomX, current_player.bottomY)) // either 0 or 1 is returned
 		{
@@ -320,6 +300,26 @@ void updateLoop(){
 		else if (enemies[i].posX < 0)
 		{
 			enemies[i].posX = 1280;
+		}
+	}
+}
+
+void updateBumpStatus(){
+	for (int i = 0; i < pipe_count; i++){
+		if (all_pipes[i].isBumped){
+			if (all_pipes[i].bump_count < 7){
+				all_pipes[i].posY += 10;
+			}
+			else if (all_pipes[i].bump_count < 14){
+				all_pipes[i].posY -= 10;
+			}
+
+			all_pipes[i].bump_count++;
+
+			if (all_pipes[i].bump_count >= 14){
+				all_pipes[i].bump_count = 0;
+				all_pipes[i].isBumped = false;
+			}
 		}
 	}
 }
@@ -429,6 +429,7 @@ int main()
 	iSetTimer(2000, spawnEnemy);
 
 	iSetTimer(100, updateCatAnim);
+	iSetTimer(10, updateBumpStatus);
 
 	iStart();
 	return 0;
