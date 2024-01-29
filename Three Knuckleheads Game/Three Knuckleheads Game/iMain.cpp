@@ -79,7 +79,7 @@ struct cat{
 player current_player;
 
 int enemy_count_max = 12;
-vector<cat> enemies;
+vector<cat> enemies; // initial 0
 
 typedef struct pipe pipe;
 struct pipe{ // Defines the platform (aka pipe) as a struct
@@ -113,7 +113,7 @@ struct pipe{ // Defines the platform (aka pipe) as a struct
 		for (int i = 0; i < enemies.size(); i++){
 			if (isColliding(enemies[i].bottomX, enemies[i].bottomY) && !enemies[i].isStunned){
 				enemies[i].isStunned = true;
-				points++;
+				points += 100;
 			}
 		}
 	}
@@ -271,16 +271,14 @@ void iDraw()
 		}
 	}
 
-	cout << points;
+	iShowImage(0, 0, 1280, 170, score_sprite);
+
 	char pointsS[50];
 	sprintf_s(pointsS, "%d", points);
-	iText(500, 500, pointsS);
-
-	iShowImage(0, 0, 1280, 170, score_sprite);
+	iText(720, 42, pointsS, GLUT_BITMAP_TIMES_ROMAN_24);
 }
 
 void updateLoop(){
-	cout << "u" << endl;
 	if (playerCollisionFlag == 0){ // colliding with no pipes at all
 		if (!current_player.hasJumped){
 			current_player.posY -= 3;
