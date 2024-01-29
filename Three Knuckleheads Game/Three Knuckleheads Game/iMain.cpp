@@ -42,26 +42,16 @@ struct cat{
 	int rightX, rightY;
 	int leftX, leftY;
 
-	int animIndex = 0, animTimer = 0;
+	int animIndex = 0;
 	int catCollisionFlag;
 
 	bool isStunned = false;
 
-	cat(){ ; };
+	cat(){;};
 
 	void render(){
 		if (!isStunned){
 			iShowImage(posX - 100 / 2, posY, 100, 100, cat_sprites[animIndex]);
-			animTimer++;
-
-			if (animTimer >= 50){
-				animTimer = 0;
-				animIndex++;
-
-				if (animIndex > 9){
-					animIndex = 0;
-				}
-			}
 		}
 		else{
 			iShowImage(posX - 100 / 2, posY, 100, 100, cat_sprites[10]);
@@ -289,10 +279,11 @@ void updateLoop(){
 	else{
 		current_player.hasLanded = true;
 	}
+
 	for (int i = 0; i < enemies.size(); i++){
 
 		if (enemies[i].catCollisionFlag == 0){
-			enemies[i].posY -= 6;
+			enemies[i].posY -= 9;
 		}
 
 		if (!enemies[i].isStunned){
@@ -333,9 +324,20 @@ void updateLoop(){
 	}
 }
 
+void updateCatAnim(){
+	for (int i = 0; i < enemies.size(); i++){
+		enemies[i].animIndex++;
+
+		if (enemies[i].animIndex > 9){
+			enemies[i].animIndex = 0;
+		}
+	}
+}
+
 void spawnEnemy(){
-	if (enemies.size() < enemy_count_max)
+	if (enemies.size() < enemy_count_max){
 		enemies.push_back(cat());
+	}
 }
 
 /*function iMouseMove() is called when the user presses and drags the mouse.
@@ -425,6 +427,8 @@ int main()
 
 	iSetTimer(25, updateLoop);
 	iSetTimer(2000, spawnEnemy);
+
+	iSetTimer(100, updateCatAnim);
 
 	iStart();
 	return 0;
