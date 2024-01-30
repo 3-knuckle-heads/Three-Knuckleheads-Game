@@ -42,6 +42,8 @@ struct cat{
 	int rightX, rightY;
 	int leftX, leftY;
 
+	int sizeX, sizeY;
+
 	int animIndex = 0;
 	int catCollisionFlag;
 
@@ -51,26 +53,39 @@ struct cat{
 	cat(){
 		if (rand() % 2){
 			posX = 50;
+			sizeX = 100;
+			leftToRight = true;
 		}
 		else{
 			posX = 1230;
+			sizeX = -100;
+			leftToRight = false;
 		}
 	};
 
 	void render(){
 		if (!isStunned){
-			iShowImage(posX - 100 / 2, posY, 100, 100, cat_sprites[animIndex]);
+			iShowImage(posX - sizeX / 2, posY, sizeX, 100, cat_sprites[animIndex]);
 		}
 		else{
-			iShowImage(posX - 100 / 2, posY, 100, 100, cat_sprites[10]);
+			iShowImage(posX - sizeX / 2, posY, sizeX, 100, cat_sprites[10]);
+		}
+	}
+
+	void move(){
+		if (leftToRight){
+			posX += 2;
+		}
+		else{
+			posX -= 2;
 		}
 	}
 
 	void updateBounds(){
 		bottomX = posX, bottomY = posY;
 		topX = posX, topY = posY + 100;
-		rightX = posX + 100 / 2, rightY = posY + 100 / 2;
-		leftX = posX - 100 / 2, leftY = posY + 100 / 2;
+		rightX = posX + sizeX / 2, rightY = posY + 100 / 2;
+		leftX = posX - sizeX / 2, leftY = posY + 100 / 2;
 	}
 };
 
@@ -281,7 +296,7 @@ void updateLoop(){
 		}
 
 		if (!enemies[i].isStunned){
-			enemies[i].posX += 2;
+			enemies[i].move();
 		}
 	}
 
@@ -319,6 +334,10 @@ void updateLoop(){
 		else if (enemies[i].posX < 0)
 		{
 			enemies[i].posX = 1280;
+
+			if (enemies[i].posY < 250){
+				enemies[i].posY = 640;
+			}
 		}
 	}
 }
@@ -398,9 +417,11 @@ key- holds the ASCII value of the key pressed.
 
 void iKeyboard(unsigned char key)
 {
-	if (key == 'j')
+	if (key == ' ')
 	{
-
+		if (current_player.hasLanded){
+			current_player.hasJumped = true;
+		}
 	}
 }
 
