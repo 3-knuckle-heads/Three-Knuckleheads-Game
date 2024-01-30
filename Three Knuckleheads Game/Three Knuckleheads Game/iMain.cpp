@@ -46,8 +46,16 @@ struct cat{
 	int catCollisionFlag;
 
 	bool isStunned = false;
+	bool leftToRight = true;
 
-	cat(){;};
+	cat(){
+		if (rand() % 2){
+			posX = 50;
+		}
+		else{
+			posX = 1230;
+		}
+	};
 
 	void render(){
 		if (!isStunned){
@@ -101,9 +109,15 @@ struct pipe{ // Defines the platform (aka pipe) as a struct
 		isBumped = true;
 
 		for (int i = 0; i < enemies.size(); i++){
-			if (isColliding(enemies[i].bottomX, enemies[i].bottomY) && !enemies[i].isStunned){
-				enemies[i].isStunned = true;
-				points += 100;
+			if (isColliding(enemies[i].bottomX, enemies[i].bottomY)){
+				if (!enemies[i].isStunned){
+					enemies[i].isStunned = true;
+				}
+				else{
+					enemies[i].isStunned = false;
+				}
+
+				points += 100; // move to die()
 			}
 		}
 	}
@@ -262,7 +276,7 @@ void updateLoop(){
 
 	for (int i = 0; i < enemies.size(); i++){
 
-		if (enemies[i].catCollisionFlag == 0){
+		if (enemies[i].catCollisionFlag == 0 && !enemies[i].isStunned){
 			enemies[i].posY -= 9;
 		}
 
@@ -291,11 +305,16 @@ void updateLoop(){
 	{
 		current_player.posX = 1280;
 	}
+
 	for (int i = 0; i < enemies.size(); i++){
 
 		if (enemies[i].posX > 1280)
 		{
 			enemies[i].posX = 0;
+
+			if (enemies[i].posY < 250){
+				enemies[i].posY = 640;
+			}
 		}
 		else if (enemies[i].posX < 0)
 		{
