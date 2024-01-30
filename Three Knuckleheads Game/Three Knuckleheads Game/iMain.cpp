@@ -3,7 +3,9 @@
 #include<vector>
 using namespace std;
 
-int jannatuz_sprite, pruz_sprite, hypo_sprite, background_sprite, score_sprite, pipe_sprite;
+int background_sprite, score_sprite;
+int jannatuz_sprite, pruz_sprite, hypo_sprite;
+int pipe_sprite;
 int cat_sprites[11];
 
 int points = 0;
@@ -20,9 +22,9 @@ struct player{ // Defines the player character for the game
 	int leftX, leftY;
 
 	player(){ ; };
-	
+
 	void render(){
-		iShowImage(posX - 100/2, posY, 100, 100, jannatuz_sprite);
+		iShowImage(posX - 100 / 2, posY, 100, 100, jannatuz_sprite);
 	}
 
 	void updateBounds(){
@@ -32,6 +34,9 @@ struct player{ // Defines the player character for the game
 		leftX = posX - 100 / 2, leftY = posY + 100 / 2;
 	}
 };
+
+player current_player;
+int playerCollisionFlag;
 
 typedef struct cat cat;
 struct cat{
@@ -47,7 +52,7 @@ struct cat{
 	int animIndex = 0;
 	int catCollisionFlag;
 
-	bool isStunned = false;
+	bool isDead = false;
 	bool leftToRight = true;
 
 	cat(){
@@ -64,11 +69,11 @@ struct cat{
 	};
 
 	void render(){
-		if (!isStunned){
-			iShowImage(posX - sizeX / 2, posY, sizeX, 100, cat_sprites[animIndex]);
+		if (!isDead){
+				iShowImage(posX - sizeX / 2, posY, sizeX, 100, cat_sprites[animIndex]);
 		}
 		else{
-			iShowImage(posX - sizeX / 2, posY, sizeX, 100, cat_sprites[10]);
+				iShowImage(posX - sizeX / 2, posY, sizeX, 100, cat_sprites[10]);
 		}
 	}
 
@@ -81,6 +86,10 @@ struct cat{
 		}
 	}
 
+	void die(){
+		isDead = true;
+	}
+
 	void updateBounds(){
 		bottomX = posX, bottomY = posY;
 		topX = posX, topY = posY + 100;
@@ -88,8 +97,6 @@ struct cat{
 		leftX = posX - sizeX / 2, leftY = posY + 100 / 2;
 	}
 };
-
-player current_player;
 
 int enemy_count_max = 12;
 vector<cat> enemies; // initial 0
@@ -109,7 +116,7 @@ struct pipe{ // Defines the platform (aka pipe) as a struct
 	};
 
 	void render(){
-		iShowImage(posX, posY, sizeX, sizeY, pipe_sprite);
+			iShowImage(posX, posY, sizeX, sizeY, pipe_sprite);
 	}
 
 	int isColliding(int playerX, int playerY){ // checks if player is colliding with a particular pipe or not
@@ -125,18 +132,16 @@ struct pipe{ // Defines the platform (aka pipe) as a struct
 
 		for (int i = 0; i < enemies.size(); i++){
 			if (isColliding(enemies[i].bottomX, enemies[i].bottomY)){
-				if (!enemies[i].isStunned){
-					enemies[i].isStunned = true;
-				}
-				else{
-					enemies[i].isStunned = false;
-				}
+				enemies[i].die();
 
 				points += 100; // move to die()
 			}
 		}
 	}
 };
+
+int pipe_count = 31;
+pipe all_pipes[31]; // Array to maintain all the pipes
 
 void images()
 {
@@ -160,11 +165,6 @@ void images()
 	cat_sprites[9] = iLoadImage("./images/cat/Walk (10).png");
 	cat_sprites[10] = iLoadImage("./images/cat/Dead (10).png");
 }
-
-int pipe_count = 31;
-pipe all_pipes[31]; // Array to maintain all the pipes
-
-int playerCollisionFlag;
 
 void generateMap(){
 	// Vertical level 1
@@ -291,11 +291,11 @@ void updateLoop(){
 
 	for (int i = 0; i < enemies.size(); i++){
 
-		if (enemies[i].catCollisionFlag == 0 && !enemies[i].isStunned){
-			enemies[i].posY -= 9;
+		if ((enemies[i].catCollisionFlag == 0 && !enemies[i].isDead) || enemies[i].isDead){
+			enemies[i].posY -= 12;
 		}
 
-		if (!enemies[i].isStunned){
+		if (!enemies[i].isDead){
 			enemies[i].move();
 		}
 	}
@@ -466,7 +466,7 @@ int main()
 	generateMap(); // used a generateMap function to generate the pipes on the foreground
 
 	iSetTimer(25, updateLoop);
-	iSetTimer(2000, spawnEnemy);
+	iSetTimer(5000, spawnEnemy);
 
 	iSetTimer(100, updateCatAnim);
 	iSetTimer(10, updateBumpStatus);
