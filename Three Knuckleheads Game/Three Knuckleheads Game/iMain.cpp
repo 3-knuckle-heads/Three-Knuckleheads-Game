@@ -10,12 +10,13 @@ enum pages { MENU, SETTINGS, LEVELS, SCORE, CREDITS, HELP, LVL1, LVL2, LVL3, BOS
 pages page = MENU;
 void changePage(pages p);
 
-int background_sprite, score_sprite, menu_sprite, credits_sprite, settings_sprite, levels_sprite;
+int background_sprite, score_sprite, menu_sprite, credits_sprite, settings_sprite, levels_sprite, help_sprite, highscore_sprite;
 int jannatuz_sprite, pruz_sprite, hypo_sprite;
 int pipe_sprite;
 int cat_sprites[11];
 
 int points = 0, health = 3, level = 1;
+bool isSoundOn = true;
 
 typedef struct player player;
 struct player{ // Defines the player character for the game
@@ -87,7 +88,7 @@ int rightFlag = 0, leftFlag = 0;
 
 typedef struct cat cat;
 struct cat{
-	int posX = 50, posY = (SCREEN_HEIGHT / 2);
+	int posX = 50, posY = 640;
 
 	int bottomX, bottomY;
 	int topX, topY;
@@ -245,8 +246,14 @@ struct button{
 	}
 };
 
-int button_count = 6;
-button buttons[6];
+int menu_button_count = 6;
+button menuButtons[6];
+
+int volume_button_count = 2;
+button volumeButtons[2];
+
+int level_button_count = 3;
+button levelButtons[3];
 
 void images()
 {
@@ -261,6 +268,8 @@ void images()
 	credits_sprite = iLoadImage("./images/Credits.jpg");
 	settings_sprite = iLoadImage("./images/Volume.jpg");
 	levels_sprite = iLoadImage("./images/Levels.png");
+	help_sprite = iLoadImage("./images/Help.jpg");
+	highscore_sprite = iLoadImage("./images/highscore.png");
 
 	cat_sprites[0] = iLoadImage("./images/cat/Walk (1).png");
 	cat_sprites[1] = iLoadImage("./images/cat/Walk (2).png");
@@ -430,16 +439,16 @@ void iDraw()
 		iShowImage(0, 0, 1280, 780, settings_sprite);
 	}
 	else if (page == LEVELS){
-
+		iShowImage(0, 0, 1280, 780, levels_sprite);
 	}
 	else if (page == SCORE){
-
+		iShowImage(0, 0, 1280, 780, highscore_sprite);
 	}
 	else if (page == CREDITS){
 		iShowImage(0, 0, 1280, 780, credits_sprite);
 	}
 	else if (page == HELP){
-
+		iShowImage(0, 0, 1280, 780, help_sprite);
 	}
 	else if (page == LVL1){
 		drawLvl1();
@@ -527,7 +536,8 @@ void updateLoop(){
 			enemies[i].posX = 0;
 
 			if (enemies[i].posY < 250){
-				enemies[i].posY = (SCREEN_HEIGHT / 2);
+				if (enemies[i].posX > SCREEN_WIDTH)
+					enemies[i].posY = 640;
 			}
 		}
 		else if (enemies[i].posX < 0)
@@ -535,7 +545,7 @@ void updateLoop(){
 			enemies[i].posX = SCREEN_WIDTH;
 
 			if (enemies[i].posY < 250){
-				enemies[i].posY = (SCREEN_HEIGHT / 2);
+				enemies[i].posY = 640;
 			}
 		}
 	}
@@ -606,10 +616,23 @@ void iMouse(int button, int state, int mx, int my)
 		mouseX = mx;
 		mouseY = my;
 		if (page == MENU){
-			for (int i = 0; i < button_count; i++){
-				if (buttons[i].hasPressed()){
-					buttons[i].callFunc();
-
+			for (int i = 0; i < menu_button_count; i++){
+				if (menuButtons[i].hasPressed()){
+					menuButtons[i].callFunc();
+				}
+			}
+		}
+		else if (page == SETTINGS){
+			for (int i = 0; i < volume_button_count; i++){
+				if (volumeButtons[i].hasPressed()){
+					volumeButtons[i].callFunc();
+				}
+			}
+		}
+		else if (page == LEVELS){
+			for (int i = 0; i < level_button_count; i++){
+				if (levelButtons[i].hasPressed()){
+					levelButtons[i].callFunc();
 				}
 			}
 		}
@@ -699,13 +722,46 @@ void help(){
 	changePage(HELP);
 }
 
+void soundOn(){
+	isSoundOn = true;
+	cout << "volume on";
+}
+
+void soundOff(){
+	isSoundOn = false;
+	cout << "volume off";
+}
+
+void lvl1(){
+	changePage(LVL1);
+}
+
+void lvl2(){
+	changePage(LVL2);
+}
+
+void lvl3(){
+	changePage(LVL3);
+}
+
 void startMenu(){
-	buttons[0] = button(1220, 870, 730, 640, play);
-	buttons[1] = button(1220, 870, 580, 490, highscore);
-	buttons[2] = button(1220, 870, 430, 340, settings);
-	buttons[3] = button(1220, 870, 280, 190, credits);
-	buttons[4] = button(1220, 870, 130, 40, quit);
-	buttons[5] = button(75, 5, 100, 30, play);
+	menuButtons[0] = button(1220, 870, 730, 640, play);
+	menuButtons[1] = button(1220, 870, 580, 490, highscore);
+	menuButtons[2] = button(1220, 870, 430, 340, settings);
+	menuButtons[3] = button(1220, 870, 280, 190, credits);
+	menuButtons[4] = button(1220, 870, 130, 40, quit);
+	menuButtons[5] = button(75, 5, 100, 30, help);
+}
+
+void startSettings(){
+	volumeButtons[0] = button(750, 650, 440, 340, soundOn);
+	volumeButtons[1] = button(900, 800, 440, 340, soundOff);
+}
+
+void startLevels(){
+	levelButtons[0] = button(370, 135, 470, 230, lvl1);
+	levelButtons[1] = button(760, 520, 470, 230, lvl2);
+	levelButtons[2] = button(1145, 905, 470, 230, lvl3);
 }
 
 void startLvl1(){
@@ -723,6 +779,12 @@ void changePage(pages p){
 
 	if (page == MENU){
 		startMenu();
+	}
+	else if (page == SETTINGS){
+		startSettings();
+	}
+	else if (page == LEVELS){
+		startLevels();
 	}
 	else if (page == LVL1){
 		startLvl1();
