@@ -11,7 +11,7 @@ pages page = MENU;
 void changePage(pages p);
 
 int background_sprite, score_sprite, menu_sprite, credits_sprite, settings_sprite, levels_sprite, help_sprite, highscore_sprite;
-int jannatuz_sprite, pruz_sprite, hypo_sprite;
+int player_sprite[3];
 int pipe_sprite;
 int cat_sprites[11];
 
@@ -41,7 +41,7 @@ struct player{ // Defines the player character for the game
 			iRotate(posX, posY + 100/2, rot);
 		}
 
-		iShowImage(posX - 100 / 2, posY, 100, 100, jannatuz_sprite);
+		iShowImage(posX - 100 / 2, posY, 100, 100, player_sprite[level-1]);
 
 		if (isDead){
 			iUnRotate();
@@ -139,10 +139,10 @@ struct cat{
 
 	void move(){
 		if (leftToRight){
-			posX += 2;
+			posX += 2 * level;
 		}
 		else{
-			posX -= 2;
+			posX -= 2 * level;
 		}
 	}
 
@@ -258,11 +258,12 @@ button levelButtons[3];
 void images()
 {
 	///updated see the documentations
-	pruz_sprite = iLoadImage("./images/Pabak.png");
-	jannatuz_sprite = iLoadImage("./images/Nayem.png");
+	player_sprite[0] = iLoadImage("./images/Nayem.png");
+	player_sprite[1] = iLoadImage("./images/Pabak.png");
+	player_sprite[2] = iLoadImage("./images/ashfaq.png");
 	background_sprite = iLoadImage("./images/bg.png");
 	score_sprite = iLoadImage("./images/board.png");
-	hypo_sprite = iLoadImage("./images/ashfaq.png");
+	
 	pipe_sprite = iLoadImage("./images/pipe.png");
 	menu_sprite = iLoadImage("./images/Menu.png");
 	credits_sprite = iLoadImage("./images/Credits.jpg");
@@ -454,10 +455,10 @@ void iDraw()
 		drawLvl1();
 	}
 	else if (page == LVL2){
-		//drawLvl2();
+		drawLvl1();
 	}
 	else if (page == LVL3){
-		//drawLvl3();
+		drawLvl1();
 	}
 	else if (page == BOSS){
 
@@ -764,14 +765,35 @@ void startLevels(){
 	levelButtons[2] = button(1145, 905, 470, 230, lvl3);
 }
 
-void startLvl1(){
+void resetLevel(){
+	all_pipes.clear();
+	enemies.clear();
+
+	points = 0;
+	current_player.posX = 50;
+	current_player.posY = 190;
+}
+
+void startLvl(int lvl){
+	resetLevel();
+
+	if (lvl == 1){
+		health = 3;
+		level = 1;
+		enemy_count_max = 10;
+	}
+	else if (lvl == 2){
+		health = 5;
+		level = 2;
+		enemy_count_max = 15;
+	}
+	else if (lvl == 3){
+		health = 7;
+		level = 3;
+		enemy_count_max = 20;
+	}
+
 	generateMap(); // used a generateMap function to generate the pipes on the foreground
-
-	iSetTimer(25, updateLoop);
-	iSetTimer(5000, spawnEnemy);
-
-	iSetTimer(100, updateCatAnim);
-	iSetTimer(10, updateBumpStatus);
 }
 
 void changePage(pages p){
@@ -787,7 +809,13 @@ void changePage(pages p){
 		startLevels();
 	}
 	else if (page == LVL1){
-		startLvl1();
+		startLvl(1);
+	}
+	else if (page == LVL2){
+		startLvl(2);
+	}
+	else if (page == LVL3){
+		startLvl(3);
 	}
 }
 
@@ -799,6 +827,12 @@ int main()
 	images(); // used an image function to declare the images
 
 	changePage(MENU);
+
+	iSetTimer(25, updateLoop);
+	iSetTimer(5000, spawnEnemy);
+
+	iSetTimer(100, updateCatAnim);
+	iSetTimer(10, updateBumpStatus);
 
 	glutSpecialUpFunc(specialUp); // subscribe the specialUp function to the glutSpecialUpFunc from glut.h
 	iStart();
