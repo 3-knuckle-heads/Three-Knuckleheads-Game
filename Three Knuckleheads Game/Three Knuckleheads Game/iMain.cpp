@@ -214,7 +214,7 @@ void images()
 	pruz_sprite = iLoadImage("./images/Pabak.png");
 	jannatuz_sprite = iLoadImage("./images/Nayem.png");
 	background_sprite = iLoadImage("./images/bg.png");
-	score_sprite = iLoadImage("./images/Score.png");
+	score_sprite = iLoadImage("./images/board.png");
 	hypo_sprite = iLoadImage("./images/ashfaq.png");
 	pipe_sprite = iLoadImage("./images/pipe.png");
 
@@ -351,11 +351,11 @@ void iDraw()
 
 	char pointsS[20];
 	sprintf_s(pointsS, "%d", points);
-	iText(720, 42, pointsS, GLUT_BITMAP_TIMES_ROMAN_24);
+	iText(433, 45, pointsS, GLUT_BITMAP_TIMES_ROMAN_24);
 
 	char healthS[20];
 	sprintf_s(healthS, "%d", health);
-	iText(720, 115, healthS, GLUT_BITMAP_TIMES_ROMAN_24);
+	iText(433, 115, healthS, GLUT_BITMAP_TIMES_ROMAN_24);
 
 	iSetColor(0, 0, 0);
 }
