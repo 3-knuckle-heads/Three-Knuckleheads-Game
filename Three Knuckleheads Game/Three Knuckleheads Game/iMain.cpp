@@ -8,7 +8,7 @@ int jannatuz_sprite, pruz_sprite, hypo_sprite;
 int pipe_sprite;
 int cat_sprites[11];
 
-int points = 0, health = 3;
+int points = 0, health = 3, level = 1;
 
 typedef struct player player;
 struct player{ // Defines the player character for the game
@@ -356,6 +356,10 @@ void iDraw()
 	char healthS[20];
 	sprintf_s(healthS, "%d", health);
 	iText(433, 115, healthS, GLUT_BITMAP_TIMES_ROMAN_24);
+
+	char levelS[20];
+	sprintf_s(levelS, "%d", level);
+	iText(1135, 83, levelS, GLUT_BITMAP_TIMES_ROMAN_24);
 
 	iSetColor(0, 0, 0);
 }
