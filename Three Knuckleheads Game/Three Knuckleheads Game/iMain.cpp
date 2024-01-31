@@ -718,7 +718,7 @@ void iSpecialKeyboard(unsigned char key)
 	{
 		leftFlag = 1;
 	}
-	if (key == GLUT_KEY_HOME){
+	if (key == GLUT_KEY_HOME || key == GLUT_KEY_F1){
 		changePage(MENU);
 	}
 }
