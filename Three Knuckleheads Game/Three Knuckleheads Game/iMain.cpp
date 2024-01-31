@@ -65,6 +65,10 @@ struct player{ // Defines the player character for the game
 	}
 
 	void die(){
+		if (isSoundOn){
+			PlaySound("sounds\\playerdie.wav", NULL, SND_ASYNC);
+		}
+
 		isDead = true;
 		
 		if (health < 1){
@@ -161,6 +165,10 @@ struct cat{
 	}
 
 	void die(){
+		if (isSoundOn){
+			PlaySound("sounds\\enemydie.wav", NULL, SND_ASYNC);
+		}
+
 		isDead = true;
 		points += 100;
 	}
@@ -212,6 +220,10 @@ struct pipe{ // Defines the platform (aka pipe) as a struct
 	}
 
 	void bump(){
+		if (isSoundOn){
+			PlaySound("sounds\\bump.wav", NULL, SND_ASYNC);
+		}
+
 		isBumped = true;
 
 		for (int i = 0; i < enemies.size(); i++){
@@ -345,7 +357,7 @@ void generateMap(){
 	all_pipes.push_back(pipe(SCREEN_WIDTH, 600));
 }
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::Idraw Here::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::://
-void drawLvl1(){
+void drawLvl(){
 	current_player.updateBounds();
 
 	for (int i = 0; i < enemies.size(); i++)
@@ -420,6 +432,7 @@ void drawLvl1(){
 	}
 
 	iShowImage(0, 0, SCREEN_WIDTH, 170, score_sprite);
+	iShowImage(22, 25, 125, 125, player_sprite[level - 1]);
 
 	iSetColor(55, 228, 255);
 
@@ -465,13 +478,13 @@ void iDraw()
 		iShowImage(0, 0, 1280, 780, help_sprite);
 	}
 	else if (page == LVL1){
-		drawLvl1();
+		drawLvl();
 	}
 	else if (page == LVL2){
-		drawLvl1();
+		drawLvl();
 	}
 	else if (page == LVL3){
-		drawLvl1();
+		drawLvl();
 	}
 	else if (page == BOSS){
 
@@ -755,6 +768,7 @@ void soundOn(){
 void soundOff(){
 	isSoundOn = false;
 	cout << "volume off";
+	PlaySound(0, 0, 0);
 }
 
 void lvl1(){
@@ -770,12 +784,18 @@ void lvl3(){
 }
 
 void startMenu(){
+
+
 	menuButtons[0] = button(1220, 870, 730, 640, play);
 	menuButtons[1] = button(1220, 870, 580, 490, highscore);
 	menuButtons[2] = button(1220, 870, 430, 340, settings);
 	menuButtons[3] = button(1220, 870, 280, 190, credits);
 	menuButtons[4] = button(1220, 870, 130, 40, quit);
 	menuButtons[5] = button(75, 5, 100, 30, help);
+
+	if (isSoundOn){
+		PlaySound("sounds\\bgmusic.wav", NULL, SND_LOOP | SND_ASYNC);
+	}
 }
 
 void startSettings(){
@@ -800,6 +820,7 @@ void resetLevel(){
 
 void startLvl(int lvl){
 	resetLevel();
+	PlaySound(0, 0, 0);
 
 	if (lvl == 1){
 		health = 3;
