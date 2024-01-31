@@ -21,10 +21,23 @@ struct player{ // Defines the player character for the game
 	int rightX, rightY;
 	int leftX, leftY;
 
+	double rot = 0;
+
+	bool isDead = false;
+
 	player(){ ; };
 
 	void render(){
+		if (isDead){
+			rot += 0.6;
+			iRotate(posX, posY + 100/2, rot);
+		}
+
 		iShowImage(posX - 100 / 2, posY, 100, 100, jannatuz_sprite);
+
+		if (isDead){
+			iUnRotate();
+		}
 	}
 
 	void updateBounds(){
@@ -41,6 +54,10 @@ struct player{ // Defines the player character for the game
 		}
 
 		return 0;
+	}
+
+	void die(){
+		isDead = true;
 	}
 };
 
@@ -59,9 +76,12 @@ struct cat{
 
 	int sizeX, sizeY;
 
+	double rot = 0;
+
 	int animIndex = 0;
 	int catCollisionFlag;
 
+	bool isStunned = false;
 	bool isDead = false;
 	bool leftToRight = true;
 
@@ -79,11 +99,20 @@ struct cat{
 	};
 
 	void render(){
-		if (!isDead){
-				iShowImage(posX - sizeX / 2, posY, sizeX, 100, cat_sprites[animIndex]);
+		if (isDead){
+			rot += 0.6;
+			iRotate(posX, posY, rot);
+		}
+
+		if (!isStunned){
+			iShowImage(posX - sizeX / 2, posY, sizeX, 100, cat_sprites[animIndex]);
 		}
 		else{
-				iShowImage(posX - sizeX / 2, posY, sizeX, 100, cat_sprites[10]);
+			iShowImage(posX - sizeX / 2, posY, sizeX, 100, cat_sprites[10]);
+		}
+
+		if (isDead){
+			iUnRotate();
 		}
 	}
 
@@ -96,12 +125,23 @@ struct cat{
 		}
 	}
 
+	void stun(){
+		isStunned = !isStunned;
+		posY += 50;
+	}
+
 	void die(){
 		isDead = true;
+		points += 100;
 	}
 
 	void collide(){
-		cout << "muri kha!" << endl;
+		if (isStunned){
+			die();
+		}
+		else{
+			current_player.die();
+		}
 	}
 
 	void updateBounds(){
@@ -146,9 +186,7 @@ struct pipe{ // Defines the platform (aka pipe) as a struct
 
 		for (int i = 0; i < enemies.size(); i++){
 			if (isColliding(enemies[i].bottomX, enemies[i].bottomY)){
-				enemies[i].die();
-
-				points += 100; // move to die()
+				enemies[i].stun();
 			}
 		}
 	}
@@ -285,11 +323,12 @@ void iDraw()
 	}
 
 	for (int i = 0; i < enemies.size(); i++){
+		if (enemies[i].isDead) continue;
+
 		// bottom collision check for cat
 		if (current_player.isColliding(enemies[i].rightX, enemies[i].rightY) || current_player.isColliding(enemies[i].leftX, enemies[i].leftY)) // either 0 or 1 is returned
 		{
 			enemies[i].collide(); // colliding with player
-
 		}
 	}
 
@@ -314,11 +353,14 @@ void updateLoop(){
 
 	for (int i = 0; i < enemies.size(); i++){
 
-		if ((enemies[i].catCollisionFlag == 0 && !enemies[i].isDead) || enemies[i].isDead){
+		if (enemies[i].catCollisionFlag == 0){
 			enemies[i].posY -= 12;
 		}
+		else if (enemies[i].isDead){
+			enemies[i].posY -= 16;
+		}
 
-		if (!enemies[i].isDead){
+		if (!enemies[i].isStunned){
 			enemies[i].move();
 		}
 	}
