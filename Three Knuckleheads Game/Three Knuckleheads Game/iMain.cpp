@@ -10,9 +10,9 @@ enum pages { MENU, SETTINGS, LEVELS, SCORE, CREDITS, HELP, LVL1, LVL2, LVL3, BOS
 pages page = MENU;
 void changePage(pages p);
 
-int background_sprite, score_sprite, menu_sprite, credits_sprite, settings_sprite, levels_sprite, help_sprite, highscore_sprite;
+int background_sprite[3], score_sprite, menu_sprite, credits_sprite, settings_sprite, levels_sprite, help_sprite, highscore_sprite;
 int player_sprite[3];
-int pipe_sprite;
+int pipe_sprite[3];
 int cat_sprites[11];
 
 int points = 0, health = 3, level = 1;
@@ -138,11 +138,20 @@ struct cat{
 	}
 
 	void move(){
+		int speed = 2;
+		
+		if (level == 2){
+			speed = 3;
+		}
+		else if (level == 3){
+			speed = 4;
+		}
+
 		if (leftToRight){
-			posX += 2 * level;
+			posX += speed;
 		}
 		else{
-			posX -= 2 * level;
+			posX -= speed;
 		}
 	}
 
@@ -191,7 +200,7 @@ struct pipe{ // Defines the platform (aka pipe) as a struct
 	};
 
 	void render(){
-		iShowImage(posX, posY, sizeX, sizeY, pipe_sprite);
+		iShowImage(posX, posY, sizeX, sizeY, pipe_sprite[level-1]);
 	}
 
 	int isColliding(int x, int y){ // checks if target is colliding with a particular pipe or not
@@ -259,12 +268,16 @@ void images()
 {
 	///updated see the documentations
 	player_sprite[0] = iLoadImage("./images/Nayem.png");
-	player_sprite[1] = iLoadImage("./images/Pabak.png");
-	player_sprite[2] = iLoadImage("./images/ashfaq.png");
-	background_sprite = iLoadImage("./images/bg.png");
+	player_sprite[1] = iLoadImage("./images/Durjoy.png");
+	player_sprite[2] = iLoadImage("./images/Pabak.png");
+	background_sprite[0] = iLoadImage("./images/bg.png");
+	background_sprite[1] = iLoadImage("./images/bg1.png");
+	background_sprite[2] = iLoadImage("./images/bg2.png");
 	score_sprite = iLoadImage("./images/board.png");
 	
-	pipe_sprite = iLoadImage("./images/pipe.png");
+	pipe_sprite[0] = iLoadImage("./images/pipe.png");
+	pipe_sprite[1] = iLoadImage("./images/pipe1.png");
+	pipe_sprite[2] = iLoadImage("./images/pipe2.png");
 	menu_sprite = iLoadImage("./images/Menu.png");
 	credits_sprite = iLoadImage("./images/Credits.jpg");
 	settings_sprite = iLoadImage("./images/Volume.jpg");
@@ -338,7 +351,7 @@ void drawLvl1(){
 	for (int i = 0; i < enemies.size(); i++)
 		enemies[i].updateBounds();
 
-	iShowImage(0, 150, SCREEN_WIDTH, 650, background_sprite);
+	iShowImage(0, 150, SCREEN_WIDTH, 650, background_sprite[level - 1]);
 
 	// render the player
 	current_player.render();
@@ -586,14 +599,27 @@ void updateCatAnim(){
 	}
 }
 
-void spawnEnemy(){
-	if (page != LVL1 && page != LVL2 && page != LVL3) return;
-
+void createEnemy(){
 	if (enemies.size() < enemy_count_max){
 		enemies.push_back(cat());
 	}
 }
 
+void spawnEnemyLvl1(){
+	if (page != LVL1) return;
+
+	createEnemy();
+}
+void spawnEnemyLvl2(){
+	if (page != LVL2) return;
+
+	createEnemy();
+}
+void spawnEnemyLvl3(){
+	if (page != LVL3) return;
+
+	createEnemy();
+}
 /*function iMouseMove() is called when the user presses and drags the mouse.
 (mx, my) is the position where the mouse pointer is.
 */
@@ -684,8 +710,6 @@ void specialUp(int key, int x, int y){ // Called directly from glut
 
 void iSpecialKeyboard(unsigned char key)
 {
-
-
 	if (key == GLUT_KEY_RIGHT)
 	{
 		rightFlag = 1;
@@ -829,7 +853,9 @@ int main()
 	changePage(MENU);
 
 	iSetTimer(25, updateLoop);
-	iSetTimer(5000, spawnEnemy);
+	iSetTimer(5000, spawnEnemyLvl1);
+	iSetTimer(4000, spawnEnemyLvl2);
+	iSetTimer(3000, spawnEnemyLvl3);
 
 	iSetTimer(100, updateCatAnim);
 	iSetTimer(10, updateBumpStatus);
