@@ -10,7 +10,7 @@ enum pages { MENU, SETTINGS, LEVELS, SCORE, CREDITS, HELP, LVL1, LVL2, LVL3, BOS
 pages page = MENU;
 void changePage(pages p);
 
-int background_sprite, score_sprite, menu_sprite;
+int background_sprite, score_sprite, menu_sprite, credits_sprite, settings_sprite, levels_sprite;
 int jannatuz_sprite, pruz_sprite, hypo_sprite;
 int pipe_sprite;
 int cat_sprites[11];
@@ -258,6 +258,9 @@ void images()
 	hypo_sprite = iLoadImage("./images/ashfaq.png");
 	pipe_sprite = iLoadImage("./images/pipe.png");
 	menu_sprite = iLoadImage("./images/Menu.png");
+	credits_sprite = iLoadImage("./images/Credits.jpg");
+	settings_sprite = iLoadImage("./images/Volume.jpg");
+	levels_sprite = iLoadImage("./images/Levels.png");
 
 	cat_sprites[0] = iLoadImage("./images/cat/Walk (1).png");
 	cat_sprites[1] = iLoadImage("./images/cat/Walk (2).png");
@@ -424,7 +427,7 @@ void iDraw()
 		drawMenu();
 	}
 	else if (page == SETTINGS){
-
+		iShowImage(0, 0, 1280, 780, settings_sprite);
 	}
 	else if (page == LEVELS){
 
@@ -433,7 +436,7 @@ void iDraw()
 
 	}
 	else if (page == CREDITS){
-
+		iShowImage(0, 0, 1280, 780, credits_sprite);
 	}
 	else if (page == HELP){
 
@@ -453,6 +456,8 @@ void iDraw()
 }
 
 void updateLoop(){
+	if (page != LVL1 && page != LVL2 && page != LVL3) return;
+
 	if (playerCollisionFlag == 0){ // colliding with no pipes at all
 		if (!current_player.hasJumped){
 			current_player.posY -= 8;
@@ -537,6 +542,8 @@ void updateLoop(){
 }
 
 void updateBumpStatus(){
+	if (page != LVL1 && page != LVL2 && page != LVL3) return;
+
 	for (int i = 0; i < all_pipes.size(); i++){
 		if (all_pipes[i].isBumped){
 			if (all_pipes[i].bump_count < 7){
@@ -557,6 +564,8 @@ void updateBumpStatus(){
 }
 
 void updateCatAnim(){
+	if (page != LVL1 && page != LVL2 && page != LVL3) return;
+
 	for (int i = 0; i < enemies.size(); i++){
 		enemies[i].animIndex++;
 
@@ -567,6 +576,8 @@ void updateCatAnim(){
 }
 
 void spawnEnemy(){
+	if (page != LVL1 && page != LVL2 && page != LVL3) return;
+
 	if (enemies.size() < enemy_count_max){
 		enemies.push_back(cat());
 	}
@@ -594,10 +605,12 @@ void iMouse(int button, int state, int mx, int my)
 	{
 		mouseX = mx;
 		mouseY = my;
-		for (int i = 0; i < button_count; i++){
-			if (buttons[i].hasPressed()){
-				buttons[i].callFunc();
-				
+		if (page == MENU){
+			for (int i = 0; i < button_count; i++){
+				if (buttons[i].hasPressed()){
+					buttons[i].callFunc();
+
+				}
 			}
 		}
 	}
@@ -657,7 +670,9 @@ void iSpecialKeyboard(unsigned char key)
 	{
 		leftFlag = 1;
 	}
-
+	if (key == GLUT_KEY_HOME){
+		changePage(MENU);
+	}
 }
 
 void play(){
