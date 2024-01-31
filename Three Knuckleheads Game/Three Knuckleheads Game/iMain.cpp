@@ -33,10 +33,20 @@ struct player{ // Defines the player character for the game
 		rightX = posX + 100 / 2, rightY = posY + 100 / 2;
 		leftX = posX - 100 / 2, leftY = posY + 100 / 2;
 	}
+
+
+	int isColliding(int x, int y){ // checks if target is colliding with the player
+		if ((x >= leftX + 40 && x <= rightX - 40) && (y >= bottomY && y <= topY)){
+			return 1;
+		}
+
+		return 0;
+	}
 };
 
 player current_player;
 int playerCollisionFlag;
+int rightFlag = 0, leftFlag = 0;
 
 typedef struct cat cat;
 struct cat{
@@ -90,6 +100,10 @@ struct cat{
 		isDead = true;
 	}
 
+	void collide(){
+		cout << "muri kha!" << endl;
+	}
+
 	void updateBounds(){
 		bottomX = posX, bottomY = posY;
 		topX = posX, topY = posY + 100;
@@ -98,7 +112,7 @@ struct cat{
 	}
 };
 
-int enemy_count_max = 12;
+int enemy_count_max = 8;
 vector<cat> enemies; // initial 0
 
 typedef struct pipe pipe;
@@ -119,8 +133,8 @@ struct pipe{ // Defines the platform (aka pipe) as a struct
 			iShowImage(posX, posY, sizeX, sizeY, pipe_sprite);
 	}
 
-	int isColliding(int playerX, int playerY){ // checks if player is colliding with a particular pipe or not
-		if ((playerX >= posX && playerX <= posX + sizeX) && (playerY >= posY && playerY <= posY + sizeY)){
+	int isColliding(int x, int y){ // checks if target is colliding with a particular pipe or not
+		if ((x >= posX && x <= posX + sizeX) && (y >= posY && y <= posY + sizeY)){
 			return 1;
 		}
 
@@ -270,6 +284,15 @@ void iDraw()
 		}
 	}
 
+	for (int i = 0; i < enemies.size(); i++){
+		// bottom collision check for cat
+		if (current_player.isColliding(enemies[i].rightX, enemies[i].rightY) || current_player.isColliding(enemies[i].leftX, enemies[i].leftY)) // either 0 or 1 is returned
+		{
+			enemies[i].collide(); // colliding with player
+
+		}
+	}
+
 	iShowImage(0, 0, 1280, 170, score_sprite);
 
 	char pointsS[50];
@@ -280,7 +303,7 @@ void iDraw()
 void updateLoop(){
 	if (playerCollisionFlag == 0){ // colliding with no pipes at all
 		if (!current_player.hasJumped){
-			current_player.posY -= 3;
+			current_player.posY -= 8;
 		}
 
 		current_player.hasLanded = false;
@@ -309,6 +332,14 @@ void updateLoop(){
 			current_player.hasJumped = false;
 			current_player.jump_count = 0;
 		}
+	}
+
+	if (rightFlag){
+		current_player.posX += 9;
+	}
+
+	if (leftFlag){
+		current_player.posX -= 9;
 	}
 
 	// Screen looping logic 
@@ -434,24 +465,28 @@ GLUT_KEY_F7, GLUT_KEY_F8, GLUT_KEY_F9, GLUT_KEY_F10, GLUT_KEY_F11, GLUT_KEY_F12,
 GLUT_KEY_LEFT, GLUT_KEY_UP, GLUT_KEY_RIGHT, GLUT_KEY_DOWN, GLUT_KEY_PAGE UP,
 GLUT_KEY_PAGE DOWN, GLUT_KEY_HOME, GLUT_KEY_END, GLUT_KEY_INSERT
 */
+
+void specialUp(int key, int x, int y){ // Called directly from glut
+	if (key == 102){ // right key int value 102
+		rightFlag = 0;
+	}
+
+	if (key == 100){
+		leftFlag = 0;
+	}
+}
+
 void iSpecialKeyboard(unsigned char key)
 {
 
 
 	if (key == GLUT_KEY_RIGHT)
 	{
-		current_player.posX += 40;
+		rightFlag = 1;
 	}
 	if (key == GLUT_KEY_LEFT)
 	{
-		current_player.posX -= 40;   // 8 to 12 range is good
-	}
-
-	if (key == GLUT_KEY_UP)
-	{
-		if (current_player.hasLanded){
-			current_player.hasJumped = true;
-		}
+		leftFlag = 1;
 	}
 
 }
@@ -471,6 +506,8 @@ int main()
 	iSetTimer(100, updateCatAnim);
 	iSetTimer(10, updateBumpStatus);
 
+	glutSpecialUpFunc(specialUp); // subscribe the specialUp function to the glutSpecialUpFunc from glut.h
 	iStart();
+
 	return 0;
 }
