@@ -205,8 +205,8 @@ struct pipe{ // Defines the platform (aka pipe) as a struct
 	}
 };
 
-int pipe_count = 31;
-pipe all_pipes[31]; // Array to maintain all the pipes
+
+vector<pipe> all_pipes; // vector to maintain all the pipes
 
 void images()
 {
@@ -233,49 +233,49 @@ void images()
 
 void generateMap(){
 	// Vertical level 1
-	all_pipes[0] = pipe(0, 300);
-	all_pipes[1] = pipe(120, 300);
-	all_pipes[2] = pipe(240, 300);
-	all_pipes[3] = pipe(360, 300);
-	all_pipes[4] = pipe(680, 300);
-	all_pipes[5] = pipe(800, 300);
-	all_pipes[6] = pipe(920, 300);
-	all_pipes[7] = pipe(1040, 300);
-	all_pipes[8] = pipe(1160, 300);   // 0 to 8 index
+	all_pipes.push_back(pipe(0,300));
+	all_pipes.push_back(pipe(120, 300));
+	all_pipes.push_back (pipe(240, 300));
+	all_pipes.push_back(pipe(360, 300));
+	all_pipes.push_back (pipe(680, 300));
+	all_pipes.push_back (pipe(800, 300));
+	all_pipes.push_back(pipe(920, 300));
+	all_pipes.push_back(pipe(1040, 300));
+	all_pipes.push_back(pipe(1160, 300));   // 0 to 8 index
 
 
 
 	// Vertical level 2
-	all_pipes[9] = pipe(240, 450);
-	all_pipes[10] = pipe(360, 450);
-	all_pipes[11] = pipe(480, 450);
-	all_pipes[12] = pipe(600, 450);
-	all_pipes[13] = pipe(720, 450);
-	all_pipes[14] = pipe(1040, 450);
-	all_pipes[15] = pipe(1160, 450);
+	all_pipes.push_back(pipe(240, 450));
+	all_pipes.push_back(pipe(360, 450));
+	all_pipes.push_back(pipe(480, 450));
+	all_pipes.push_back(pipe(600, 450));
+	all_pipes.push_back(pipe(720, 450));
+	all_pipes.push_back(pipe(1040, 450));
+	all_pipes.push_back(pipe(1160, 450));
 
 	// Vertical level 3
-	all_pipes[16] = pipe(0, 600);
-	all_pipes[17] = pipe(120, 600);
-	all_pipes[18] = pipe(240, 600);
-	all_pipes[19] = pipe(360, 600);
-	all_pipes[20] = pipe(680, 600);
-	all_pipes[21] = pipe(800, 600);
-	all_pipes[22] = pipe(920, 600);
-	all_pipes[23] = pipe(1040, 600);
-	all_pipes[24] = pipe(1160, 600);
+	all_pipes.push_back(pipe(0, 600));
+	all_pipes.push_back(pipe(120, 600));
+	all_pipes.push_back(pipe(240, 600));
+	all_pipes.push_back(pipe(360, 600));
+	all_pipes.push_back(pipe(680, 600));
+	all_pipes.push_back(pipe(800, 600));
+	all_pipes.push_back(pipe(920, 600));
+	all_pipes.push_back(pipe(1040, 600));
+	all_pipes.push_back(pipe(1160, 600));
 
 	// Bottom (under score image) pipe, so that player does not fall through bottom
-	all_pipes[25] = pipe(0, 0);
+	all_pipes.push_back(pipe(0, 0));
 	all_pipes[25].sizeX = 1400;
 	all_pipes[25].sizeY = 170;
 
 	// Side (out of screen) pipes, so that player does not fall when looping the screen
-	all_pipes[26] = pipe(-120, 300);
-	all_pipes[27] = pipe(1280, 300);
-	all_pipes[28] = pipe(1280, 450);
-	all_pipes[29] = pipe(-120, 600);
-	all_pipes[30] = pipe(1280, 600);
+	all_pipes.push_back(pipe(-120, 300));
+	all_pipes.push_back(pipe(1280, 300));
+	all_pipes.push_back(pipe(1280, 450));
+	all_pipes.push_back(pipe(-120, 600));
+	all_pipes.push_back(pipe(1280, 600));
 }
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::Idraw Here::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::://
 
@@ -301,7 +301,7 @@ void iDraw()
 
 	playerCollisionFlag = 0; // flag for colliding
 	
-	for (int i = 0; i < pipe_count; i++){
+	for (int i = 0; i < all_pipes.size(); i++){
 		all_pipes[i].render();
 
 		// bottom collision check
@@ -445,7 +445,7 @@ void updateLoop(){
 }
 
 void updateBumpStatus(){
-	for (int i = 0; i < pipe_count; i++){
+	for (int i = 0; i < all_pipes.size(); i++){
 		if (all_pipes[i].isBumped){
 			if (all_pipes[i].bump_count < 7){
 				all_pipes[i].posY += 10;
