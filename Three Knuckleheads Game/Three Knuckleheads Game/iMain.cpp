@@ -3,7 +3,14 @@
 #include<vector>
 using namespace std;
 
-int background_sprite, score_sprite;
+#define SCREEN_WIDTH 1280
+#define SCREEN_HEIGHT 780
+
+enum pages { MENU, SETTINGS, LEVELS, SCORE, CREDITS, HELP, LVL1, LVL2, LVL3, BOSS };
+pages page = MENU;
+void changePage(pages p);
+
+int background_sprite, score_sprite, menu_sprite;
 int jannatuz_sprite, pruz_sprite, hypo_sprite;
 int pipe_sprite;
 int cat_sprites[11];
@@ -80,7 +87,7 @@ int rightFlag = 0, leftFlag = 0;
 
 typedef struct cat cat;
 struct cat{
-	int posX = 50, posY = 640;
+	int posX = 50, posY = (SCREEN_HEIGHT / 2);
 
 	int bottomX, bottomY;
 	int topX, topY;
@@ -165,7 +172,7 @@ struct cat{
 	}
 };
 
-int enemy_count_max = 8;
+int enemy_count_max = 10;
 vector<cat> enemies; // initial 0
 
 typedef struct pipe pipe;
@@ -183,7 +190,7 @@ struct pipe{ // Defines the platform (aka pipe) as a struct
 	};
 
 	void render(){
-			iShowImage(posX, posY, sizeX, sizeY, pipe_sprite);
+		iShowImage(posX, posY, sizeX, sizeY, pipe_sprite);
 	}
 
 	int isColliding(int x, int y){ // checks if target is colliding with a particular pipe or not
@@ -208,6 +215,39 @@ struct pipe{ // Defines the platform (aka pipe) as a struct
 
 vector<pipe> all_pipes; // vector to maintain all the pipes
 
+int mouseX, mouseY;
+
+typedef struct button button;
+struct button{
+	int rightX, leftX, topY, bottomY;
+	(void*)func;
+	
+	button(){ ; };
+
+	button(int rX, int lX, int tY, int bY, void (*f)(void)){
+		rightX = rX;
+		leftX = lX;
+		topY = tY;
+		bottomY = bY;
+
+		func = f;
+	};
+
+	bool hasPressed(){
+		if (mouseX >= leftX && mouseX <= rightX && mouseY >= bottomY && mouseY <= topY){
+			return true;
+		}
+		return false;
+	}
+
+	void callFunc(){
+		((void(*)())func)();
+	}
+};
+
+int button_count = 6;
+button buttons[6];
+
 void images()
 {
 	///updated see the documentations
@@ -217,6 +257,7 @@ void images()
 	score_sprite = iLoadImage("./images/board.png");
 	hypo_sprite = iLoadImage("./images/ashfaq.png");
 	pipe_sprite = iLoadImage("./images/pipe.png");
+	menu_sprite = iLoadImage("./images/Menu.png");
 
 	cat_sprites[0] = iLoadImage("./images/cat/Walk (1).png");
 	cat_sprites[1] = iLoadImage("./images/cat/Walk (2).png");
@@ -272,24 +313,20 @@ void generateMap(){
 
 	// Side (out of screen) pipes, so that player does not fall when looping the screen
 	all_pipes.push_back(pipe(-120, 300));
-	all_pipes.push_back(pipe(1280, 300));
-	all_pipes.push_back(pipe(1280, 450));
+	all_pipes.push_back(pipe(SCREEN_WIDTH, 300));
+	all_pipes.push_back(pipe(SCREEN_WIDTH, 450));
 	all_pipes.push_back(pipe(-120, 600));
-	all_pipes.push_back(pipe(1280, 600));
+	all_pipes.push_back(pipe(SCREEN_WIDTH, 600));
 }
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::Idraw Here::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::://
-
-
-void iDraw()
-{
-	iClear();
+void drawLvl1(){
 	current_player.updateBounds();
 
 	for (int i = 0; i < enemies.size(); i++)
 		enemies[i].updateBounds();
 
-	iShowImage(0, 150, 1280, 650, background_sprite);
-	
+	iShowImage(0, 150, SCREEN_WIDTH, 650, background_sprite);
+
 	// render the player
 	current_player.render();
 	for (int i = 0; i < enemies.size(); i++){
@@ -300,7 +337,7 @@ void iDraw()
 	//iShowImage(250, 650, 100, 50, pruz_sprite);
 
 	playerCollisionFlag = 0; // flag for colliding
-	
+
 	for (int i = 0; i < all_pipes.size(); i++){
 		all_pipes[i].render();
 
@@ -345,7 +382,18 @@ void iDraw()
 		}
 	}
 
-	iShowImage(0, 0, 1280, 170, score_sprite);
+	bool allDead = true;
+	for (int i = 0; i < enemies.size(); i++){
+		if (!enemies[i].isDead){
+			allDead = false;
+		}
+	}
+
+	if (allDead){
+		// you win
+	}
+
+	iShowImage(0, 0, SCREEN_WIDTH, 170, score_sprite);
 
 	iSetColor(55, 228, 255);
 
@@ -359,9 +407,49 @@ void iDraw()
 
 	char levelS[20];
 	sprintf_s(levelS, "%d", level);
-	iText(1135, 83, levelS, GLUT_BITMAP_TIMES_ROMAN_24);
+	iText(800, 83, levelS, GLUT_BITMAP_TIMES_ROMAN_24);
 
 	iSetColor(0, 0, 0);
+}
+
+void drawMenu(){
+	iShowImage(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, menu_sprite);
+}
+
+void iDraw()
+{
+	iClear(); // MENU, SETTINGS, LEVELS, SCORE, CREDITS, HELP, LVL1, LVL2, LVL3, BOSS
+
+	if (page == MENU){
+		drawMenu();
+	}
+	else if (page == SETTINGS){
+
+	}
+	else if (page == LEVELS){
+
+	}
+	else if (page == SCORE){
+
+	}
+	else if (page == CREDITS){
+
+	}
+	else if (page == HELP){
+
+	}
+	else if (page == LVL1){
+		drawLvl1();
+	}
+	else if (page == LVL2){
+		//drawLvl2();
+	}
+	else if (page == LVL3){
+		//drawLvl3();
+	}
+	else if (page == BOSS){
+
+	}
 }
 
 void updateLoop(){
@@ -414,13 +502,13 @@ void updateLoop(){
 	}
 
 	// Screen looping logic 
-	if (current_player.posX > 1280)
+	if (current_player.posX > SCREEN_WIDTH)
 	{
 		current_player.posX = 0;
 	}
 	else if (current_player.posX < 0)
 	{
-		current_player.posX = 1280;
+		current_player.posX = SCREEN_WIDTH;
 	}
 
 	if (current_player.posY < 0 && health > 0){
@@ -429,20 +517,20 @@ void updateLoop(){
 
 	for (int i = 0; i < enemies.size(); i++){
 
-		if (enemies[i].posX > 1280)
+		if (enemies[i].posX > SCREEN_WIDTH)
 		{
 			enemies[i].posX = 0;
 
 			if (enemies[i].posY < 250){
-				enemies[i].posY = 640;
+				enemies[i].posY = (SCREEN_HEIGHT / 2);
 			}
 		}
 		else if (enemies[i].posX < 0)
 		{
-			enemies[i].posX = 1280;
+			enemies[i].posX = SCREEN_WIDTH;
 
 			if (enemies[i].posY < 250){
-				enemies[i].posY = 640;
+				enemies[i].posY = (SCREEN_HEIGHT / 2);
 			}
 		}
 	}
@@ -504,8 +592,14 @@ void iMouse(int button, int state, int mx, int my)
 
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
 	{
-
-
+		mouseX = mx;
+		mouseY = my;
+		for (int i = 0; i < button_count; i++){
+			if (buttons[i].hasPressed()){
+				buttons[i].callFunc();
+				
+			}
+		}
 	}
 
 
@@ -566,13 +660,40 @@ void iSpecialKeyboard(unsigned char key)
 
 }
 
+void play(){
+	changePage(LEVELS);
+}
 
-int main()
-{
-	///srand((unsigned)time(NULL));
-	iInitialize(1280, 780, "Three Knuckleheads");
-	
-	images(); // used an image function to declare the images
+void highscore(){
+	changePage(SCORE);
+}
+
+void settings(){
+	changePage(SETTINGS);
+}
+
+void credits(){
+	changePage(CREDITS);
+}
+
+void quit(){
+	exit(0);
+}
+
+void help(){
+	changePage(HELP);
+}
+
+void startMenu(){
+	buttons[0] = button(1220, 870, 730, 640, play);
+	buttons[1] = button(1220, 870, 580, 490, highscore);
+	buttons[2] = button(1220, 870, 430, 340, settings);
+	buttons[3] = button(1220, 870, 280, 190, credits);
+	buttons[4] = button(1220, 870, 130, 40, quit);
+	buttons[5] = button(75, 5, 100, 30, play);
+}
+
+void startLvl1(){
 	generateMap(); // used a generateMap function to generate the pipes on the foreground
 
 	iSetTimer(25, updateLoop);
@@ -580,6 +701,27 @@ int main()
 
 	iSetTimer(100, updateCatAnim);
 	iSetTimer(10, updateBumpStatus);
+}
+
+void changePage(pages p){
+	page = p;
+
+	if (page == MENU){
+		startMenu();
+	}
+	else if (page == LVL1){
+		startLvl1();
+	}
+}
+
+int main()
+{
+	///srand((unsigned)time(NULL));
+	iInitialize(SCREEN_WIDTH, SCREEN_HEIGHT, "Three Knuckleheads");
+	
+	images(); // used an image function to declare the images
+
+	changePage(MENU);
 
 	glutSpecialUpFunc(specialUp); // subscribe the specialUp function to the glutSpecialUpFunc from glut.h
 	iStart();
