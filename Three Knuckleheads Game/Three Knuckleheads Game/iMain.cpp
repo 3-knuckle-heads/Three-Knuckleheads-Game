@@ -8,7 +8,7 @@ int jannatuz_sprite, pruz_sprite, hypo_sprite;
 int pipe_sprite;
 int cat_sprites[11];
 
-int points = 0;
+int points = 0, health = 3;
 
 typedef struct player player;
 struct player{ // Defines the player character for the game
@@ -58,6 +58,19 @@ struct player{ // Defines the player character for the game
 
 	void die(){
 		isDead = true;
+		
+		if (health < 1){
+			// game over
+		}
+		else{
+			health--;
+		}
+	}
+
+	void reset(){
+		isDead = false;
+		posX = 50;
+		posY = 190;
 	}
 };
 
@@ -139,7 +152,7 @@ struct cat{
 		if (isStunned){
 			die();
 		}
-		else{
+		else if (!current_player.isDead){
 			current_player.die();
 		}
 	}
@@ -334,9 +347,17 @@ void iDraw()
 
 	iShowImage(0, 0, 1280, 170, score_sprite);
 
-	char pointsS[50];
+	iSetColor(55, 228, 255);
+
+	char pointsS[20];
 	sprintf_s(pointsS, "%d", points);
 	iText(720, 42, pointsS, GLUT_BITMAP_TIMES_ROMAN_24);
+
+	char healthS[20];
+	sprintf_s(healthS, "%d", health);
+	iText(720, 115, healthS, GLUT_BITMAP_TIMES_ROMAN_24);
+
+	iSetColor(0, 0, 0);
 }
 
 void updateLoop(){
@@ -349,6 +370,10 @@ void updateLoop(){
 	}
 	else{
 		current_player.hasLanded = true;
+	}
+
+	if (current_player.isDead){
+		current_player.posY -= 10;
 	}
 
 	for (int i = 0; i < enemies.size(); i++){
@@ -392,6 +417,10 @@ void updateLoop(){
 	else if (current_player.posX < 0)
 	{
 		current_player.posX = 1280;
+	}
+
+	if (current_player.posY < 0 && health > 0){
+		current_player.reset();
 	}
 
 	for (int i = 0; i < enemies.size(); i++){
