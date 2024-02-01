@@ -884,6 +884,19 @@ void readScoreFile(){
 		for (int i = 0; i < 5; i++){
 			fscanf_s(fp, "%s %d", names[i], 20, &scores[i]);
 		}
+	 	strcpy_s(names[5], "newPlayer");
+		scores[5] = points;
+
+		for (int i = 0; i < 6 - 1; i++){
+			for (int j = i+1; j < 6; j++)
+			{
+				if (scores[i] < scores[j]){
+
+					swap(scores[i], scores[j]);
+					swap(names[i], names[j]);
+				}
+			}
+		}
 
 		for (int i = 0; i < 5; i++){ // show text in highscore
 		//	printf_s("%s %d\n", names[i], scores[i]);
