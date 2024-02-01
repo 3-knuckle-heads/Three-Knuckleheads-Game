@@ -849,9 +849,9 @@ void startLvl(int lvl){
 	PlaySound(0, 0, 0);
 
 	if (lvl == 1){
-		health = 1;
+		health = 3;
 		level = 1;
-		enemy_count_max = 1;
+		enemy_count_max = 10;
 	}
 	else if (lvl == 2){
 		health = 5;
