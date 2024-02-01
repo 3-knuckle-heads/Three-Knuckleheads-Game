@@ -434,7 +434,7 @@ void drawLvl(){
 		}
 	}
 
-	if (allDead){
+	if (allDead && enemies.size() == enemy_count_max){
 		// you win
 		writeScoreFile();
 	}
@@ -888,14 +888,9 @@ void sortScores()
 
 void readScoreFile(){
 	FILE *fp;
-	fopen_s(&fp, "HighScore.txt", "r");
+	fopen_s(&fp, "HighScore.txt", "r+");
 
-	if (fp == NULL){
-		cout << "Error opening file. Creating new.\n";
-		fopen_s(&fp, "HighScore.txt", "w");
-		fclose(fp);
-	}
-	else{
+	if (fp != NULL){
 		for (int i = 0; i < 5; i++){
 			fscanf_s(fp, "%s %d", names[i], 20, &scores[i]);
 		}
@@ -917,13 +912,11 @@ void readScoreFile(){
 }
 
 void writeScoreFile(){
+	cout << "called" << endl;
 	FILE *fp;
 	fopen_s(&fp, "HighScore.txt", "w+");
 
-	if (fp == NULL){
-		cout << "Error opening file.\n";
-	}
-	else{
+	if (fp != NULL){
 		for (int i = 0; i < 5; i++){
 			fscanf_s(fp, "%s %d", names[i], 20, &scores[i]);
 
@@ -938,6 +931,9 @@ void writeScoreFile(){
 
 		sortScores();
 
+		for (int i = 0; i < 6; i++)
+			cout << names[i] << scores[i];
+
 		for (int i = 0; i < 5; i++){ // show text in highscore
 			fprintf_s(fp, "%s %d\n", names[i], scores[i]);
 		}
@@ -948,11 +944,12 @@ void writeScoreFile(){
 
 void writeDefaultScores(){
 	FILE *fp;
-	fopen_s(&fp, "HighScore.txt", "r");
+	fopen_s(&fp, "HighScore.txt", "r+");
 
 	if (fp == NULL){
-		fopen_s(&fp, "HighScore.txt", "w");
-		fprintf_s(fp, "anupoma 500\nfema 700\nahona 400\nnazim 900\ndhruvo 1100\n");
+		cout << "HighScore.txt does not exist. creating default." << endl;
+		fopen_s(&fp, "HighScore.txt", "w+");
+		fprintf_s(fp, "anupoma 500\nfema 700\nahona 400\nnazim 900\ndhruvo 100\n");
 	}
 	fclose(fp);
 }
