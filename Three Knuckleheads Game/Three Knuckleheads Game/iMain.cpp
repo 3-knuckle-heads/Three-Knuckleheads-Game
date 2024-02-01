@@ -370,6 +370,27 @@ void generateMap(){
 	all_pipes.push_back(pipe(SCREEN_WIDTH, 600));
 }
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::Idraw Here::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::://
+void showBottombar(){
+	iShowImage(0, 0, SCREEN_WIDTH, 170, score_sprite);
+
+	iShowImage(22, 25, 125, 125, player_sprite[level - 1]);
+	iSetColor(55, 228, 255);
+
+	char pointsS[20];
+	sprintf_s(pointsS, "%d", points);
+	iText(433, 45, pointsS, GLUT_BITMAP_TIMES_ROMAN_24);
+
+	char healthS[20];
+	sprintf_s(healthS, "%d", health);
+	iText(433, 115, healthS, GLUT_BITMAP_TIMES_ROMAN_24);
+
+	char levelS[20];
+	sprintf_s(levelS, "%d", level);
+	iText(800, 83, levelS, GLUT_BITMAP_TIMES_ROMAN_24);
+
+	iSetColor(0, 0, 0);
+}
+
 void drawLvl(){
 	current_player.updateBounds();
 
@@ -440,6 +461,8 @@ void drawLvl(){
 		}
 	}
 
+	showBottombar();
+
 	if (allDead){
 		// you win
 		if (enemies.size() == enemy_count_max && !win){ // runs once
@@ -454,26 +477,11 @@ void drawLvl(){
 
 	if (gameover){ // runs always game over
 		iShowImage(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, lose_sprite);
+		char pointsS[20];
+		sprintf_s(pointsS, "%d", points);
+		iText(475, 260, pointsS, GLUT_BITMAP_TIMES_ROMAN_24);
+		iText(345, 205, "Player_1", GLUT_BITMAP_TIMES_ROMAN_24);
 	}
-
-	iShowImage(0, 0, SCREEN_WIDTH, 170, score_sprite);
-	iShowImage(22, 25, 125, 125, player_sprite[level - 1]);
-
-	iSetColor(55, 228, 255);
-
-	char pointsS[20];
-	sprintf_s(pointsS, "%d", points);
-	iText(433, 45, pointsS, GLUT_BITMAP_TIMES_ROMAN_24);
-
-	char healthS[20];
-	sprintf_s(healthS, "%d", health);
-	iText(433, 115, healthS, GLUT_BITMAP_TIMES_ROMAN_24);
-
-	char levelS[20];
-	sprintf_s(levelS, "%d", level);
-	iText(800, 83, levelS, GLUT_BITMAP_TIMES_ROMAN_24);
-
-	iSetColor(0, 0, 0);
 }
 
 void drawMenu(){
@@ -671,7 +679,7 @@ void iMouseMove(int mx, int my)
 //*******************************************************************ipassiveMouse***********************************************************************//
 void iPassiveMouseMove(int mx, int my)
 {
-	//cout << mx << " " << my << "\n";
+	cout << mx << " " << my << "\n";
 }
 
 void iMouse(int button, int state, int mx, int my)
@@ -842,6 +850,7 @@ void resetLevel(){
 	points = 0;
 	current_player.posX = 50;
 	current_player.posY = 190;
+	win = gameover = false;
 }
 
 void startLvl(int lvl){
@@ -937,13 +946,13 @@ void writeScoreFile(){
 		for (int i = 0; i < 5; i++){
 			fscanf_s(fp, "%s %d", names[i], 20, &scores[i]);
 			//cout << names[i] << scores[i];
-			if (strcmp(names[i], "newPlayer") == 0 && scores[i] == points){
+			if (strcmp(names[i], "Player_1") == 0 && scores[i] == points){
 				cout << "ruh";
 				return;
 			}
 		}
 
-		strcpy_s(names[5], "newPlayer");
+		strcpy_s(names[5], "Player_1");
 		scores[5] = points;
 
 		sortScores();
@@ -971,7 +980,7 @@ void writeDefaultScores(){
 	if (fp == NULL){
 		cout << "HighScore.txt does not exist. creating default." << endl;
 		fopen_s(&fp, "HighScore.txt", "w+");
-		fprintf_s(fp, "anupoma 500\nfema 700\nahona 400\nnazim 900\ndhruvo 100\n");
+		fprintf_s(fp, "anupoma 700\nfema 600\nahona 400\nnazim 400\ndhruvo 100\n");
 	}
 	fclose(fp);
 }
@@ -983,14 +992,12 @@ int main()
 	
 	images(); // used an image function to declare the images
 
-	
-
 	changePage(MENU);
 
 	iSetTimer(25, updateLoop);
 	iSetTimer(5000, spawnEnemyLvl1);
 	iSetTimer(4000, spawnEnemyLvl2);
-	iSetTimer(3000, spawnEnemyLvl3);
+	iSetTimer(3500, spawnEnemyLvl3);
 
 	iSetTimer(100, updateCatAnim);
 	iSetTimer(10, updateBumpStatus);
