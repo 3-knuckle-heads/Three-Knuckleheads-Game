@@ -597,8 +597,7 @@ void updateLoop(){
 			enemies[i].posX = 0;
 
 			if (enemies[i].posY < 250){
-				if (enemies[i].posX > SCREEN_WIDTH)
-					enemies[i].posY = 640;
+				enemies[i].posY = 640;
 			}
 		}
 		else if (enemies[i].posX < 0)
