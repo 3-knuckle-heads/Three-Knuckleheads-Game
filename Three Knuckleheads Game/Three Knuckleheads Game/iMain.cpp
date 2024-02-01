@@ -18,6 +18,12 @@ int cat_sprites[11];
 int points = 0, health = 3, level = 1;
 bool isSoundOn = true;
 
+char names[6][20];
+int scores[6];
+
+void readScoreFile();
+void writeScoreFile();
+
 typedef struct player player;
 struct player{ // Defines the player character for the game
 	int posX = 50, posY = 190;
@@ -470,6 +476,7 @@ void iDraw()
 	}
 	else if (page == SCORE){
 		iShowImage(0, 0, 1280, 780, highscore_sprite);
+		readScoreFile();
 	}
 	else if (page == CREDITS){
 		iShowImage(0, 0, 1280, 780, credits_sprite);
@@ -864,12 +871,66 @@ void changePage(pages p){
 	}
 }
 
+void readScoreFile(){
+	FILE *fp;
+	fopen_s(&fp, "HighScore.txt", "r");
+
+	if (fp == NULL){
+		cout << "Error opening file. Creating new.\n";
+		fopen_s(&fp, "HighScore.txt", "w");
+		fclose(fp);
+	}
+	else{
+		for (int i = 0; i < 5; i++){
+			fscanf_s(fp, "%s %d", names[i], 20, &scores[i]);
+		}
+
+		for (int i = 0; i < 5; i++){ // show text in highscore
+		//	printf_s("%s %d\n", names[i], scores[i]);
+			char pointsS[20];
+			sprintf_s(pointsS, "%d", scores[i]);
+
+			iSetColor(0, 0, 255);
+			iText(325, 455 - i * 90, names[i], GLUT_BITMAP_TIMES_ROMAN_24);
+			iText(890, 455 - i * 90, pointsS, GLUT_BITMAP_TIMES_ROMAN_24);
+			iSetColor(0, 0, 0);
+		}
+
+		fclose(fp);
+	}
+}
+
+void writeScoreFile(){
+	FILE *fp;
+	fopen_s(&fp, "HighScore.txt", "w+");
+
+	if (fp == NULL){
+		cout << "Error opening file.\n";
+	}
+	else{
+		for (int i = 0; i < 5; i++){
+			fscanf_s(fp, "%s %d", names[i], 20, &scores[i]);
+		}
+
+
+
+		for (int i = 0; i < 5; i++){ // show text in highscore
+			//	printf_s("%s %d\n", names[i], scores[i]);
+			
+		}
+
+		fclose(fp);
+	}
+}
+
 int main()
 {
 	///srand((unsigned)time(NULL));
 	iInitialize(SCREEN_WIDTH, SCREEN_HEIGHT, "Three Knuckleheads");
 	
 	images(); // used an image function to declare the images
+
+	
 
 	changePage(MENU);
 

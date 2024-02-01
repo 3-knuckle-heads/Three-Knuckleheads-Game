@@ -1,0 +1,5 @@
+pabak 100
+durjoy 400
+nayem 600
+mark 300
+john 700
