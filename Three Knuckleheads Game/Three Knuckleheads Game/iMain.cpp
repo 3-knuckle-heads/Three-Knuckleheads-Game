@@ -10,12 +10,14 @@ enum pages { MENU, SETTINGS, LEVELS, SCORE, CREDITS, HELP, LVL1, LVL2, LVL3, BOS
 pages page = MENU;
 void changePage(pages p);
 
-int background_sprite[3], score_sprite, menu_sprite, credits_sprite, settings_sprite, levels_sprite, help_sprite, highscore_sprite;
+int background_sprite[3];
+int score_sprite, menu_sprite, credits_sprite, settings_sprite, levels_sprite, help_sprite, highscore_sprite, win_sprite, lose_sprite;
 int player_sprite[3];
 int pipe_sprite[3];
 int cat_sprites[11];
 
 int points = 0, health = 3, level = 1;
+bool gameover = false, win = false;
 bool isSoundOn = true;
 
 char names[6][20];
@@ -77,13 +79,15 @@ struct player{ // Defines the player character for the game
 
 		isDead = true;
 		
-		if (health < 1){
+		health--;
+
+		if (health < 1){ // runs once
 			// game over
+			cout << "game over\n";
+			gameover = true;
 			writeScoreFile();
 		}
-		else{
-			health--;
-		}
+		
 	}
 
 	void reset(){
@@ -293,6 +297,8 @@ void images()
 	background_sprite[1] = iLoadImage("./images/bg1.png");
 	background_sprite[2] = iLoadImage("./images/bg2.png");
 	score_sprite = iLoadImage("./images/board.png");
+	win_sprite = iLoadImage("./images/win.png");
+	lose_sprite = iLoadImage("./images/gameover.png");
 	
 	pipe_sprite[0] = iLoadImage("./images/pipe.png");
 	pipe_sprite[1] = iLoadImage("./images/pipe1.png");
@@ -434,9 +440,20 @@ void drawLvl(){
 		}
 	}
 
-	if (allDead && enemies.size() == enemy_count_max){
+	if (allDead){
 		// you win
-		writeScoreFile();
+		if (enemies.size() == enemy_count_max && !win){ // runs once
+			writeScoreFile();
+			win = true;
+		}
+		
+		if (win){ // runs always
+			iShowImage(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, win_sprite);
+		}
+	}
+
+	if (gameover){ // runs always game over
+		iShowImage(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, lose_sprite);
 	}
 
 	iShowImage(0, 0, SCREEN_WIDTH, 170, score_sprite);
@@ -832,9 +849,9 @@ void startLvl(int lvl){
 	PlaySound(0, 0, 0);
 
 	if (lvl == 1){
-		health = 3;
+		health = 1;
 		level = 1;
-		enemy_count_max = 10;
+		enemy_count_max = 1;
 	}
 	else if (lvl == 2){
 		health = 5;
@@ -914,12 +931,12 @@ void readScoreFile(){
 void writeScoreFile(){
 	cout << "called" << endl;
 	FILE *fp;
-	fopen_s(&fp, "HighScore.txt", "w+");
+	fopen_s(&fp, "HighScore.txt", "r+");
 
 	if (fp != NULL){
 		for (int i = 0; i < 5; i++){
 			fscanf_s(fp, "%s %d", names[i], 20, &scores[i]);
-
+			//cout << names[i] << scores[i];
 			if (strcmp(names[i], "newPlayer") == 0 && scores[i] == points){
 				cout << "ruh";
 				return;
@@ -931,14 +948,19 @@ void writeScoreFile(){
 
 		sortScores();
 
-		for (int i = 0; i < 6; i++)
-			cout << names[i] << scores[i];
-
-		for (int i = 0; i < 5; i++){ // show text in highscore
-			fprintf_s(fp, "%s %d\n", names[i], scores[i]);
-		}
-
 		fclose(fp);
+		fopen_s(&fp, "HighScore.txt", "w");
+
+		if (fp != NULL){
+			for (int i = 0; i < 6; i++)
+				//cout << names[i] << scores[i];
+
+			for (int i = 0; i < 5; i++){ // show text in highscore
+				fprintf_s(fp, "%s %d\n", names[i], scores[i]);
+			}
+
+			fclose(fp);
+		}
 	}
 }
 
