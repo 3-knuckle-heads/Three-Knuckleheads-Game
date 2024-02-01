@@ -79,6 +79,7 @@ struct player{ // Defines the player character for the game
 		
 		if (health < 1){
 			// game over
+			writeScoreFile();
 		}
 		else{
 			health--;
@@ -435,6 +436,7 @@ void drawLvl(){
 
 	if (allDead){
 		// you win
+		writeScoreFile();
 	}
 
 	iShowImage(0, 0, SCREEN_WIDTH, 170, score_sprite);
@@ -652,7 +654,7 @@ void iMouseMove(int mx, int my)
 //*******************************************************************ipassiveMouse***********************************************************************//
 void iPassiveMouseMove(int mx, int my)
 {
-	cout << mx << " " << my << "\n";
+	//cout << mx << " " << my << "\n";
 }
 
 void iMouse(int button, int state, int mx, int my)
@@ -871,6 +873,19 @@ void changePage(pages p){
 	}
 }
 
+void sortScores()
+{
+	for (int i = 0; i < 6 - 1; i++){
+		for (int j = i + 1; j < 6; j++)
+		{
+			if (scores[i] < scores[j]){
+				swap(scores[i], scores[j]);
+				swap(names[i], names[j]);
+			}
+		}
+	}
+}
+
 void readScoreFile(){
 	FILE *fp;
 	fopen_s(&fp, "HighScore.txt", "r");
@@ -884,20 +899,8 @@ void readScoreFile(){
 		for (int i = 0; i < 5; i++){
 			fscanf_s(fp, "%s %d", names[i], 20, &scores[i]);
 		}
-	 	strcpy_s(names[5], "newPlayer");
-		scores[5] = points;
 
-		for (int i = 0; i < 6 - 1; i++){
-			for (int j = i+1; j < 6; j++)
-			{
-				if (scores[i] < scores[j]){
-
-					swap(scores[i], scores[j]);
-					swap(names[i], names[j]);
-				}
-			}
-		}
-
+	//	sortScores();
 		for (int i = 0; i < 5; i++){ // show text in highscore
 		//	printf_s("%s %d\n", names[i], scores[i]);
 			char pointsS[20];
@@ -923,17 +926,35 @@ void writeScoreFile(){
 	else{
 		for (int i = 0; i < 5; i++){
 			fscanf_s(fp, "%s %d", names[i], 20, &scores[i]);
+
+			if (strcmp(names[i], "newPlayer") == 0 && scores[i] == points){
+				cout << "ruh";
+				return;
+			}
 		}
 
+		strcpy_s(names[5], "newPlayer");
+		scores[5] = points;
 
+		sortScores();
 
 		for (int i = 0; i < 5; i++){ // show text in highscore
-			//	printf_s("%s %d\n", names[i], scores[i]);
-			
+			fprintf_s(fp, "%s %d\n", names[i], scores[i]);
 		}
 
 		fclose(fp);
 	}
+}
+
+void writeDefaultScores(){
+	FILE *fp;
+	fopen_s(&fp, "HighScore.txt", "r");
+
+	if (fp == NULL){
+		fopen_s(&fp, "HighScore.txt", "w");
+		fprintf_s(fp, "anupoma 500\nfema 700\nahona 400\nnazim 900\ndhruvo 1100\n");
+	}
+	fclose(fp);
 }
 
 int main()
@@ -954,6 +975,8 @@ int main()
 
 	iSetTimer(100, updateCatAnim);
 	iSetTimer(10, updateBumpStatus);
+
+	writeDefaultScores();
 
 	glutSpecialUpFunc(specialUp); // subscribe the specialUp function to the glutSpecialUpFunc from glut.h
 	iStart();
